@@ -3,7 +3,8 @@
 Study wiki and lecture-note scaffolds for a general physics course, built from the textbook
 **І. М. Кучерук, І. Т. Горбачук, П. П. Луцик. *Загальний курс фізики*** (т. 1–3). The notes themselves are written by hand; this repository holds everything that supports them.
 
-📄 **[Book/physics-notes.pdf](Book/physics-notes.pdf)**: the whole wiki compiled into one 103-page book.
+📄 **[Book/physics-notes.pdf](Book/physics-notes.pdf)**: the whole wiki compiled into one 103-page book (explanations in English).
+📄 **[Book/physics-notes-uk.pdf](Book/physics-notes-uk.pdf)**: the Ukrainian-first edition. All explanations are in Ukrainian, with English equivalents of key terms «(англ. …)».
 
 | Syllabus | Questions | Pages | Status |
 |---|---|---|---|
@@ -24,6 +25,7 @@ wiki/                     the study wiki (Karpathy "LLM wiki" pattern)
   sources/                chapter/§ → page maps for т. 1–3
   glossary.md             ~100 terms: Ukrainian (as in the book), formula, English, page
   log.md                  history of the work
+wiki-uk/                  Ukrainian-first mirror of the book pages (source for physics-notes-uk.pdf)
 Book/                     wiki → LuaLaTeX → physics-notes.pdf (build.py, make.sh)
 Books/text/               OCR of the three textbook volumes (Tesseract ukr+eng), one file per printed page
 Books/download.sh         fetches the textbook scans (not in git) into Books/raw/
@@ -48,7 +50,8 @@ Books/download.sh --library   # plus the rest of the reading list below → Book
 ## Building the PDF
 
 ```bash
-Book/make.sh
+Book/make.sh       # English edition
+Book/make.sh uk    # Ukrainian edition
 ```
 
 It converts the wiki with `Book/build.py` and compiles with LuaLaTeX in a docker image (`physics-tex`: Ubuntu 24.04 + texlive-luatex, texlive-lang-cyrillic, texlive-latex-extra, fonts-dejavu) on a build host. Edit `make.sh` to change the host, or run `lualatex physics-notes.tex` twice anywhere that has those packages.

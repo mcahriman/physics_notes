@@ -19,9 +19,11 @@ wiki/topics/<syllabus>/NN_*.md   one scaffold per syllabus question (electrostat
 wiki/concepts/                   cross-topic ideas
 wiki/sources/kucheruk{1,2,3}.md  chapter/§ → pages → spreads → topics
 wiki/glossary.md                 exact terms, formula, EN, page
+wiki-uk/                         Ukrainian-first mirror of wiki/ (topics, concepts, syllabi, glossary) for the uk book
 .claude/skills/physics-wiki/     navigation skill + scripts (page.sh, find.sh)
 .claude/agents/glossary-validator.md   checks the glossary against the scans
-Book/build.py, Book/make.sh        wiki -> one LuaLaTeX book -> Book/physics-notes.pdf (run ./make.sh)
+.claude/agents/translation-proofreader.md   checks wiki-uk/ against wiki/
+Book/build.py, Book/make.sh        wiki -> one LuaLaTeX book -> Book/physics-notes.pdf (./make.sh) or physics-notes-uk.pdf (./make.sh uk)
 ```
 
 ## Sources
@@ -50,6 +52,10 @@ Repository: github.com/mcahriman/physics_notes (**public**). Never commit the sc
 ## PDF book
 
 `Book/make.sh` converts the wiki (`Book/build.py`, a converter for the wiki's Markdown subset) and compiles it with LuaLaTeX on **orca** in the docker image `physics-tex` (`~/physics-book/`). Neither the laptop nor orca's own TeX Live can build it: orca lacks luaotfload and Cyrillic support. Rebuild after any wiki change. A clean build reports 0 errors and 0 missing characters; about 7 small overfull lines remain, mostly in the 9-column process table. Keep wiki Markdown inside the subset build.py handles: one list nesting level, `$$…$$` on its own line, pipe tables.
+
+## Ukrainian edition
+
+`wiki-uk/` mirrors the book pages of `wiki/` with all explanations in Ukrainian. Key terms keep English equivalents as «(англ. …)», and the glossary uses «(англ.)». Formulas, equation numbers, page refs and «quotes» are identical to `wiki/`. **`wiki/` is the source of truth:** after changing a page there, update its `wiki-uk/` counterpart, run the `translation-proofreader` agent, then rebuild with `Book/make.sh uk`.
 
 ## Scope: now
 

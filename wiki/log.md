@@ -69,3 +69,8 @@ Quick view: `grep "^## \[" wiki/log.md | tail -10`
   - (1.60), p. 51: printed φ₁ − φ₂ = −∫E dl, which contradicts (1.53) and (1.59) (page 08).
 - Wiki fix: page 23, w = ρj² is (2.48) and w = σE² is (2.49); they were both labelled (2.49).
 - Index, both syllabus status tables and CLAUDE.md updated.
+
+## [2026-10-25] setup | Ukrainian-first edition
+- `wiki-uk/`: all 44 topic pages, 4 concepts, both syllabi and the glossary translated into Ukrainian. English equivalents of key terms are kept as «(англ. …)», and the glossary uses «(англ.)». Formulas, eq. numbers, page refs and quotes are unchanged.
+- `Book/build.py uk` / `Book/make.sh uk` → `Book/physics-notes-uk.pdf` (103 pages, 0 errors, 0 missing glyphs).
+- New agent `translation-proofreader` (`.claude/agents/`) checks `wiki-uk/` against `wiki/`.

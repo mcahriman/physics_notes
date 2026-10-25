@@ -5,14 +5,16 @@ Handles only the Markdown subset the wiki uses: YAML frontmatter, #/## headings,
 paragraphs, -/1. lists (one nesting level), pipe tables, ``` code blocks, **bold**,
 ***bold italic***, `code`, [links](...), $inline$ and $$display$$ math.
 Build the PDF with:  lualatex physics-notes.tex  (twice, for the table of contents).
+With the argument "uk" it reads the Ukrainian-first wiki (wiki-uk/) and writes physics-notes-uk.tex.
 """
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-WIKI = ROOT / "wiki"
-OUT = Path(__file__).resolve().parent / "physics-notes.tex"
+LANG = "uk" if "uk" in sys.argv[1:] else "en"
+WIKI = ROOT / ("wiki-uk" if LANG == "uk" else "wiki")
+OUT = Path(__file__).resolve().parent / ("physics-notes-uk.tex" if LANG == "uk" else "physics-notes.tex")
 
 ELECTRO = sorted((WIKI / "topics/electrostatics").glob("*.md"))
 # Molecular pages in the study order of the plan (blocks A–H), not syllabus order.
@@ -334,19 +336,26 @@ FRONT = r"""
 \addcontentsline{toc}{chapter}{Як користуватися}\markboth{Як користуватися}{}
 Кожен розділ — це \textbf{каркас} однієї рукописної сторінки конспекту, а не готовий конспект. Він містить:
 \begin{itemize}
-\item \textbf{Layout} — план сторінки у вигляді рамок [A], [B], …;
+\item \textbf{@LAYOUT@} — план сторінки у вигляді рамок [A], [B], …;
 \item точні терміни й означення з підручника (у «лапках»), формули з номерами рівнянь книги, сторінки;
 \item \pen{} — місця, де треба намалювати схему чи сформулювати думку власними словами;
 \item \warn{} — розбіжності між підручником і програмою, помилки в книзі, неперевірені місця;
 \item \ok{} — формули звірено зі сканом сторінки; \spark{} — важливий або парадоксальний висновок;
-\item \textbf{Self-check} — 2–4 запитання для самоперевірки.
+\item \textbf{@SELFCHECK@} — 2–4 запитання для самоперевірки.
 \end{itemize}
-Пояснення до структури подано англійською, терміни й цитати — українською, як у підручнику. Посилання «т.~2, с.~38» — друковані сторінки підручника.
+@LANGNOTE@ Посилання «т.~2, с.~38» — друковані сторінки підручника.
 """
 
 
 def main():
-    parts = [PREAMBLE, r"\begin{document}", r"\frontmatter", FRONT, r"\tableofcontents", r"\mainmatter"]
+    front = FRONT
+    if LANG == "uk":
+        front = (front.replace("@LAYOUT@} — план сторінки у вигляді рамок", "План сторінки} — розкладка сторінки на рамки").replace("@SELFCHECK@", "Самоперевірка")
+                 .replace("@LANGNOTE@", "Усі пояснення — українською; поруч із ключовими термінами в дужках подано англійські відповідники «(англ. …)». Терміни й цитати — дослівно з підручника."))
+    else:
+        front = (front.replace("@LAYOUT@", "Layout").replace("@SELFCHECK@", "Self-check")
+                 .replace("@LANGNOTE@", "Пояснення до структури подано англійською, терміни й цитати — українською, як у підручнику."))
+    parts = [PREAMBLE, r"\begin{document}", r"\frontmatter", front, r"\tableofcontents", r"\mainmatter"]
     parts.append(r"\part{Електростатика і постійний струм}")
     parts.append(chapter("Програма: 23 питання"))
     parts.append(syllabus_intro(WIKI / "syllabi/electrostatics.md"))
