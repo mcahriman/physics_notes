@@ -1,0 +1,16 @@
+# Textbook scans: fetched by Books/download.sh, not stored in git
+Books/raw/
+Books/library/
+*.part
+
+# Assignment photo contains classmates' handwritten names; its questions are transcribed in wiki/syllabi/mkr2-molecular.md
+Assignments/Lecture notest/Molecular_Thermodyn.jpg
+
+# Build by-products
+__pycache__/
+Book/*.log
+Book/*.aux
+Book/*.toc
+Book/*.out
+Books/text/ocr.log
+Books/text/.done

@@ -1,0 +1,43 @@
+---
+type: syllabus
+raw: "Assignments/Lecture notest/Electrostatics.pdf"
+scope: now
+updated: 2026-10-25
+---
+# Електростатика + постійний струм — 23 питання
+
+[index](../index.md) · source: [т. 2, розд. 1–2](../sources/kucheruk2.md)
+
+The assignment is handwritten lecture notes for each question. Status: 📝 skeleton ready · ✅ formulas checked against the scan · ✍️ written by hand (the user marks this one).
+
+| № | Питання (as worded in the syllabus) | Wiki page | § | Status |
+|---|---|---|---|---|
+| 1 | Електричний заряд та його властивості | [01](../topics/electrostatics/01_Електричний_заряд.md) | 1.1 | 📝✅ |
+| 2 | Закон Кулона. Диполь в неоднорідному полі | [02](../topics/electrostatics/02_Закон_Кулона_диполь_в_неоднорідному_полі.md) | 1.2–1.3, 1.6 | 📝✅ |
+| 3 | Напруженість електричного поля E | [03](../topics/electrostatics/03_Напруженість_електричного_поля.md) | 1.4–1.5 | 📝✅ |
+| 4 | Потенціал електричного поля | [04](../topics/electrostatics/04_Потенціал_електричного_поля.md) | 1.10–1.11 | 📝✅ |
+| 5 | Диполь в однорідному електричному полі | [05](../topics/electrostatics/05_Диполь_в_однорідному_полі.md) | 1.6 | 📝✅ |
+| 6 | Потік вектора напруженості електричного поля E. Теорема Гауса | [06](../topics/electrostatics/06_Потік_вектора_E_теорема_Гаусса.md) | 1.7 | 📝✅ |
+| 7 | Дивергенція вектора E | [07](../topics/electrostatics/07_Дивергенція_вектора_E.md) | 1.8 | 📝✅ |
+| 8 | Зв'язок між напруженістю та потенціалом | [08](../topics/electrostatics/08_Звязок_напруженості_і_потенціалу.md) | 1.11 | 📝✅ |
+| 9 | Теорема Стокса | [09](../topics/electrostatics/09_Теорема_Стокса.md) | 1.10 | 📝✅ |
+| 10 | Поле зарядженої площини | [10–12](../topics/electrostatics/10-12_Поля_площини_двох_площин_сфери.md) | 1.7 | 📝✅ |
+| 11 | Поле двох заряджених площин (теорема Гауса) | [10–12](../topics/electrostatics/10-12_Поля_площини_двох_площин_сфери.md) | 1.7 | 📝✅ |
+| 12 | Поле сферичної поверхні | [10–12](../topics/electrostatics/10-12_Поля_площини_двох_площин_сфери.md) | 1.7, 1.11 | 📝✅ |
+| 13 | Теорема Остроградського-Гауса | [13](../topics/electrostatics/13_Теорема_Остроградського-Гаусса.md) | 1.8 | 📝✅ |
+| 14 | Провідник у зовнішньому електричному полі | [14](../topics/electrostatics/14_Провідник_у_зовнішньому_полі.md) | 1.12–1.13 | 📝✅ |
+| 15 | Конденсатори та їх ємність. Ємність плоского, циліндричного та сферичного конденсаторів | [15](../topics/electrostatics/15_Конденсатори_ємність.md) | 1.14 | 📝✅ |
+| 16 | З'єднання конденсаторів | [16](../topics/electrostatics/16_Зєднання_конденсаторів.md) | 1.14 | 📝✅ |
+| 17 | Енергія зарядженого провідника | [17](../topics/electrostatics/17_Енергія_зарядженого_провідника.md) | 1.25–1.26 | 📝✅ |
+| 18 | Енергія електростатичного поля | [18](../topics/electrostatics/18_Енергія_електростатичного_поля.md) | 1.26 | 📝✅ |
+| 19 | Електричний струм. Постійний електричний струм. Закони Ома | [19](../topics/electrostatics/19_Електричний_струм_закони_Ома.md) | 2.1–2.3 | 📝✅ |
+| 20 | Сила струму, густина струму. Електрорушійна сила | [20](../topics/electrostatics/20_Сила_струму_густина_ЕРС.md) | 2.1, 2.3 | 📝✅ |
+| 21 | Поняття опору. Потужність | [21](../topics/electrostatics/21_Поняття_опору_потужність.md) | 2.2, 2.4 | 📝✅ |
+| 22 | Перший та другий закон Кірхгофа | [22](../topics/electrostatics/22_Правила_Кірхгофа.md) | 2.6 | 📝✅ |
+| 23 | Закон Джоуля-Ленца | [23](../topics/electrostatics/23_Закон_Джоуля-Ленца.md) | 2.5 | 📝✅ |
+
+## Overlaps to keep in mind
+- 2 and 5 share the dipole. Define it once (in 5) and refer to it from 2.
+- 6, 7, 13 form one chain: Gauss (integral) → div (differential) → Ostrogradsky–Gauss (the mathematical bridge).
+- 19, 20, 21 overlap. Proposed split: 19 = Ohm's law in every form, 20 = I, j, ЕРС, 21 = R, ρ, P.
+- 17 and 18 give the same W, read once through the charges and once through the field.
