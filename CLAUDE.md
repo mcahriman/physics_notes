@@ -37,6 +37,7 @@ Book/build.py, Book/make.sh        wiki -> one LuaLaTeX book -> Book/physics-not
 - Page names are Ukrainian and match the syllabus wording. Links are relative markdown links (`[text](../topics/…md)`), so they work in the app and in Obsidian.
 - Every wiki page has YAML frontmatter (`type`, `updated`, …) and a nav line under the title.
 - Every concept is defined once and linked from elsewhere. Every claim from the book carries a page ref (`т. 2, с. 38`).
+- Book blocks [A]–[F] hold only what the book prints. Our own shorthand, rewritten forms and derivations go to `## Addendum (not in the book)` (uk: `## Доповнення (не з книги)`) at the very bottom of the page, after the self-check. Each item points back to its block (→ [C]).
 - Terms are written exactly as the book has them, e.g. «теорема Гаусса» with double с, even where the syllabus writes «Гауса».
 - After any change: update `wiki/index.md` and the syllabus status, and append to `wiki/log.md`.
 

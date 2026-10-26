@@ -21,7 +21,7 @@ ELECTRO = sorted((WIKI / "topics/electrostatics").glob("*.md"))
 MOLECULAR_ORDER = ["02", "01", "20-21", "18", "17,19", "22", "23-25", "03", "04", "06", "05",
                    "07-09", "10", "11", "12-13", "16", "14", "15", "26", "27", "28", "29", "30"]
 MOLECULAR = [next((WIKI / "topics/molecular").glob(k + "_*.md")) for k in MOLECULAR_ORDER]
-CONCEPTS = ["integral-vs-differential", "superposition", "isoprocesses-table", "transport-phenomena"]
+CONCEPTS = ["integral-vs-differential", "superposition", "isoprocesses-table", "transport-phenomena", "notation"]
 
 EMOJI = {
     "✏️": r"\pen{}", "✏": r"\pen{}", "⚠️": r"\warn{}", "⚠": r"\warn{}", "✅": r"\ok{}",

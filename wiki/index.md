@@ -84,6 +84,7 @@ All 30 МКР №2 questions on 23 pages, in study order. ✅ = formulas checked
 - [Принцип суперпозиції](concepts/superposition.md): F, E, φ, two plates, dipole
 - [Процеси в ідеальному газі: одна таблиця](concepts/isoprocesses-table.md): A, Q, ΔU, C, n for 5 processes. The best МКР cheat sheet
 - [Явища переносу: один закон](concepts/transport-phenomena.md): flux = −coefficient × gradient; D, η, λ, and Ohm
+- [Позначення, знаки й одиниці](concepts/notation.md): letters with several meanings, book vs English notation, sign conventions, units (incl. aviation). Read before using other sources
 
 ## Sources
 - [т. 1 Механіка. Молекулярна фізика і термодинаміка](sources/kucheruk1.md): chapter map + § table for ch. 14–19 → МКР questions

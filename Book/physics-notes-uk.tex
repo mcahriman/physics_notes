@@ -192,7 +192,7 @@
 \item Термін книги (курсивом): \textbf{\textit{закон квантування електричного заряду}} (англ. charge quantization). Вільні заряди складаються з однакових дискретних порцій, що дорівнюють заряду електрона.
 \end{itemize}
 
-\[q = n|e|,\quad n = \pm1, \pm2, \ldots \qquad |e| = 1{,}602\cdot10^{-19}\ \text{\text{Кл}}\]
+\[\Delta q = n|e|,\quad n = \pm1, \pm2, \ldots \qquad |e| = 1{,}602\cdot10^{-19}\ \text{\text{Кл}}\]
 
 \begin{itemize}
 \item \textbf{Дослід Міллікена (рис. 1.1, с. 18)}: намалюйте дві горизонтальні пластини, краплину олії та стрілки qE↑, $F_{A}$↑, mg↓, av↕.
@@ -296,13 +296,13 @@
 
 \needspace{5\baselineskip}\section*{[B] Векторна форма (с. 24)}
 \begin{itemize}
-\item $\vec F_{12} = \dfrac{1}{4\pi\varepsilon_0}\dfrac{q_1q_2}{r_{12}^3}\vec r_{12}$ (1.8), причому $\vec F_{12} = -\vec F_{21}$ (1.9)
+\item $\vec F_{12} = \dfrac{1}{4\pi\varepsilon_0}\dfrac{q_1q_2}{r_{12}^3}\vec r_{12}$ (1.8); так само для $\vec F_{21}$ з $\vec r_{21}$ (1.9). Оскільки $\vec r_{12} = -\vec r_{21}$, то $\vec F_{12} = -\vec F_{21}$.
 \item Сили \textbf{центральні} (англ. central forces): діють уздовж прямої, що сполучає заряди.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[C] Коефіцієнт і одиниці (с. 23–24)}
 \begin{itemize}
-\item $k = \dfrac{1}{4\pi\varepsilon_0} = 9\cdot10^9\ \dfrac{\text{\text{Н}·\text{м}}^2}{\text{\text{Кл}}^2}$; \textbf{електрична стала} (англ. electric constant) $\varepsilon_0 = 8{,}85\cdot10^{-12}$ Ф/м.
+\item $k = \dfrac{1}{4\pi\varepsilon_0} = 9\cdot10^9\ \dfrac{\text{\text{Н}·\text{м}}^2}{\text{\text{Кл}}^2}$; \textbf{електрична стала} (англ. electric constant) $\varepsilon_0 = 8{,}854\cdot10^{-12}$ Ф/м.
 \item 1 Кл = 1 А·1 с; основна одиниця — ампер, тож кулон — похідна одиниця.
 \item «Раціоналізована форма» вносить 4π у k, щоб він зник із формул, які використовують найчастіше.
 \item Необов'язково: у СГСЕ k = 1, а 1 Кл = 3·10⁹ одиниць СГСЕ.
@@ -326,7 +326,6 @@ $\vec F = \sum_i \vec F_i = \sum_i \dfrac{1}{4\pi\varepsilon_0}\dfrac{q_iq_0}{r_
 \begin{itemize}
 \item У неоднорідному полі дві сили різні, тож крім моменту сил з'являється ще й рівнодійна:
 $F = F_1 - F_2 = qE - q\left(E - \dfrac{dE}{dx}l\right) = q\dfrac{dE}{dx}l$ (1.26), диполь уздовж силової лінії (рис. 1.14).
-\item Оскільки $p = ql$, це $F = p\,\dfrac{dE}{dx}$. У книзі такого запису немає; це наше скорочення.
 \item \warn{} Неузгодженість у книзі: у тексті $F_1 = qE$ діє на заряд у сильнішому полі (+q), а на рис. 1.14 $F_1$ підписано біля −q. Результат правильний.
 \item Напрям — \textbf{у бік зростання напруженості}: диполь утягується в область сильнішого поля.
 \item \pen{} Приклад для запису: чому наелектризований гребінець притягує клаптики паперу (індуковані диполі).
@@ -345,6 +344,12 @@ $F = F_1 - F_2 = qE - q\left(E - \dfrac{dE}{dx}l\right) = q\dfrac{dE}{dx}l$ (1.2
 \item Що додає принцип суперпозиції до самого закону Кулона?
 \item Чому диполь в однорідному полі повертається, але не рухається поступально?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{(1.26) через дипольний момент} (→ [F]): оскільки $p = ql$, $F = p\,\dfrac{dE}{dx}$.
+\end{itemize}
 
 \chapter*{3. Напруженість електричного поля E}\addcontentsline{toc}{chapter}{3. Напруженість електричного поля E}\markboth{3. Напруженість електричного поля E}{3. Напруженість електричного поля E}
 
@@ -380,7 +385,6 @@ $F = F_1 - F_2 = qE - q\left(E - \dfrac{dE}{dx}l\right) = q\dfrac{dE}{dx}l$ (1.2
 \begin{itemize}
 \item $\vec E = \dfrac{1}{4\pi\varepsilon_0}\dfrac{q}{r^3}\vec r$ (1.12), де $\vec r$ — радіус-вектор від заряду q до точки (с. 28)
 \item Звідки: закон Кулона (1.8) для q і пробного заряду $q_0$, поділений на $q_0$ за (1.11).
-\item Модуль: $|\vec r| = r$, тож $E = \dfrac{q}{4\pi\varepsilon_0 r^2}$. У книзі такого запису немає; це наше скорочення.
 \item Поле \textbf{центрально-симетричне} (англ. centrally symmetric).
 \item Взаємодія у два етапи (с. 29): q₁ створює поле E₁₂, а поле діє на q₂ із силою $\vec F_{12} = q_2\vec E_{12}$.
 \end{itemize}
@@ -414,6 +418,12 @@ $F = F_1 - F_2 = qE - q\left(E - \dfrac{dE}{dx}l\right) = q\dfrac{dE}{dx}l$ (1.2
 \item Що первинне в концепції близькодії: сила чи поле?
 \end{enumerate}
 
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Модуль (1.12)} (→ [C]): $|\vec r| = r$, тож $E = \dfrac{q}{4\pi\varepsilon_0 r^2}$.
+\end{itemize}
+
 \chapter*{4. Потенціал електричного поля}\addcontentsline{toc}{chapter}{4. Потенціал електричного поля}\markboth{4. Потенціал електричного поля}{4. Потенціал електричного поля}
 
 \srcline{\book{} т. 2, \textbf{§ 1.10} (с. 44–45, робота), \textbf{§ 1.11} (с. 48–56). \ok{} Формули звірено зі сканом.}
@@ -435,10 +445,10 @@ $F = F_1 - F_2 = qE - q\left(E - \dfrac{dE}{dx}l\right) = q\dfrac{dE}{dx}l$ (1.2
 
 \needspace{5\baselineskip}\section*{[B] Означення потенціалу (с. 48–49)}
 \begin{itemize}
-\item $A_{12} = W_1 - W_2$: робота дорівнює \textbf{зменшенню} потенціальної енергії (1.53).
-\item $\varphi_1 = \dfrac{A_{1\infty}}{q_0} = \int_1^\infty E\,dl\cos\alpha$ (1.54)
+\item Робота дорівнює \textbf{зменшенню} потенціальної енергії U пробного заряду: $A_{12} = -\int_1^2 dU = q_0\int_1^2 E\,dl\cos\alpha$ (1.53)
+\item $\varphi_1 = \dfrac{A_{1\infty}}{q_0} = \dfrac{U_1}{q_0} = \int_1^\infty E\,dl\cos\alpha$ (1.54)
 \item Означення книги: «фізична величина, що чисельно дорівнює роботі, яку виконують сили електричного поля при переміщенні \textbf{пробного одиничного заряду} із заданої точки \textbf{в нескінченність}» (англ. electric potential)
-\item Рівнозначне означення: \textbf{відношення потенціальної енергії заряду до значення цього заряду}, $\varphi = W/q_0$.
+\item Інакше, словами книги: «відношення потенціальної енергії взаємодії заряду з полем до значення цього заряду» — це середній член $U_1/q_0$ у (1.54).
 \item φ — \textbf{скалярна} (англ. scalar) величина й \textbf{енергетична характеристика} поля (англ. energy characteristic). 1 В = 1 Дж/1 Кл.
 \item Нуль відліку: φ(∞) = 0 у теорії, φ(Землі) = 0 на практиці.
 \end{itemize}
@@ -504,31 +514,31 @@ $\varphi_1 - \varphi_2 = \dfrac{A_{12}}{q_0}$ (1.59), позначають \text
 \needspace{5\baselineskip}\section*{[C] Дія однорідного поля (с. 34)}
 \begin{itemize}
 \item F₊ = −F₋, рівнодійна 0, але сили утворюють \textbf{пару сил} (англ. couple):
-$M = pE\sin\alpha$ (1.24), $\vec M = [\vec p\times\vec E]$ (1.25)
+$M = pE\sin\alpha$ (1.24), $\vec M = [\vec p\cdot\vec E]$ (1.25), як надруковано
 \item Пара сил повертає \textbf{p} у напрямі \textbf{E}.
 \item \pen{} Намалюйте рис. 1.13: диполь під кутом α до E і дві сили qE.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[D] Енергія і рівновага (с. 34, 54)}
 \begin{itemize}
-\item $W = -pE\cos\alpha = -\vec p\cdot\vec E$ (1.67); у книзі на с. 54 енергію позначено U.
+\item $W = -pE\cos\alpha$ (с. 34, без номера); на с. 54 та сама енергія: $U = -\vec p\vec E = -pE\cos\alpha$ (1.67).
 \item p ∥ E — \textbf{стійка рівновага} (англ. stable equilibrium; W мінімальна); p антипаралельний до E — \textbf{нестійка} (англ. unstable).
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[E] Потенціал диполя (с. 53)}
 \begin{itemize}
-\item $\varphi = \dfrac{1}{4\pi\varepsilon_0}\dfrac{\vec p\cdot\vec r}{r^3} = \dfrac{p\cos\theta}{4\pi\varepsilon_0 r^2}$ (1.66), спадає як 1/r².
+\item $\varphi = \dfrac{1}{4\pi\varepsilon_0}\dfrac{\vec p\vec r}{r^3} = \dfrac{p\cos\alpha}{4\pi\varepsilon_0 r^2}$ (1.66), α — кут між $\vec r$ і $\vec p$; спадає як 1/r².
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{Порівняння з темою 2}
 {\small
-\begin{longtable}{>{\raggedright\arraybackslash}p{0.214\linewidth}>{\raggedright\arraybackslash}p{0.583\linewidth}>{\raggedright\arraybackslash}p{0.155\linewidth}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.181\linewidth}>{\raggedright\arraybackslash}p{0.640\linewidth}>{\raggedright\arraybackslash}p{0.131\linewidth}}
 \toprule
 \textbf{Поле} & \textbf{Сила} & \textbf{Момент} \\
 \midrule
 \endhead
 однорідне & 0 & pE sin α \\
-неоднорідне & p ∂E/∂x, у бік сильнішого поля & теж є \\
+неоднорідне & q·l·dE/dx (1.26), у бік сильнішого поля & теж є \\
 \bottomrule
 \end{longtable}
 }
@@ -539,6 +549,13 @@ $M = pE\sin\alpha$ (1.24), $\vec M = [\vec p\times\vec E]$ (1.25)
 \item Яка рівновага стійка і чому? (Скористайтеся W.)
 \item Чому поле диполя спадає швидше, ніж поле заряду?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Позначення} (→ [C], [D], [E]): книга пише скалярний добуток без крапки ($\vec p\vec E$, $\vec p\vec r$), а векторний — у квадратних дужках, $[\vec p\cdot\vec E]$ у (1.25). Сучасний запис: $\vec p\cdot\vec E$ і $\vec M = \vec p\times\vec E$.
+\item \textbf{Потенціальна енергія: W чи U} (→ [D]): книга вживає обидві літери для тієї самої енергії диполя — W на с. 34 і U на с. 54. У багатьох курсах пишуть U (або $W_p$).
+\end{itemize}
 
 \chapter*{6. Потік вектора напруженості. Теорема Гаусса}\addcontentsline{toc}{chapter}{6. Потік вектора напруженості. Теорема Гаусса}\markboth{6. Потік вектора напруженості. Теорема Гаусса}{6. Потік вектора напруженості. Теорема Гаусса}
 
@@ -612,7 +629,7 @@ $M = pE\sin\alpha$ (1.24), $\vec M = [\vec p\times\vec E]$ (1.25)
 \needspace{5\baselineskip}\section*{[B] Виведення (с. 41–42)}
 \begin{itemize}
 \item Малий паралелепіпед dx·dy·dz із зарядом ρ dV. Потік крізь пару граней ⟂ Ox дорівнює $\dfrac{\partial E_x}{\partial x}dx\,dy\,dz$; так само для y і z.
-\item За теоремою Гаусса: $\left(\dfrac{\partial E_x}{\partial x}+\dfrac{\partial E_y}{\partial y}+\dfrac{\partial E_z}{\partial z}\right)dV = \dfrac{\rho\,dV}{\varepsilon_0}$ (1.38)
+\item За теоремою Гаусса: повний потік $\left(\dfrac{\partial E_x}{\partial x}+\dfrac{\partial E_y}{\partial y}+\dfrac{\partial E_z}{\partial z}\right)dx\,dy\,dz$ дорівнює $\rho\,dx\,dy\,dz/\varepsilon_0$, тож $\dfrac{\partial E_x}{\partial x}+\dfrac{\partial E_y}{\partial y}+\dfrac{\partial E_z}{\partial z} = \dfrac{\rho}{\varepsilon_0}$ (1.38)
 \item \pen{} Намалюйте паралелепіпед: $E_{x}$ входить зліва, $E_{x}$ + (∂$E_{x}$/∂x)dx виходить справа.
 \end{itemize}
 
@@ -722,9 +739,6 @@ $\nabla^2\varphi = -\dfrac{\rho}{\varepsilon_0}$ (1.63) — \textbf{рівнян
 
 \needspace{5\baselineskip}\section*{[C] Декартова форма (с. 47)}
 $\operatorname{rot}\vec A = \left(\dfrac{\partial A_z}{\partial y}-\dfrac{\partial A_y}{\partial z}\right)\vec i + \left(\dfrac{\partial A_x}{\partial z}-\dfrac{\partial A_z}{\partial x}\right)\vec j + \left(\dfrac{\partial A_y}{\partial x}-\dfrac{\partial A_x}{\partial y}\right)\vec k$ (1.49)
-\begin{itemize}
-\item \pen{} Як запам'ятати: визначник 3×3 з рядками (i j k), (∂x ∂y ∂z), ($A_{x}$ $A_{y}$ $A_{z}$).
-\end{itemize}
 
 \needspace{5\baselineskip}\section*{[D] Теорема Стокса (с. 47)}
 \begin{itemize}
@@ -741,7 +755,7 @@ $\operatorname{div}\vec E = \rho/\varepsilon_0,\qquad \operatorname{rot}\vec E =
 \item Вони замінюють закон Кулона разом із принципом суперпозиції і є окремим випадком \textbf{рівнянь Максвелла}.
 \end{itemize}
 
-\needspace{5\baselineskip}\section*{Таблиця-пара (добре підходить для низу сторінки)}
+\needspace{5\baselineskip}\section*{Таблиця-пара (наш підсумок; добре підходить для низу сторінки)}
 {\small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.091\linewidth}>{\raggedright\arraybackslash}p{0.208\linewidth}>{\raggedright\arraybackslash}p{0.245\linewidth}>{\raggedright\arraybackslash}p{0.392\linewidth}}
 \toprule
@@ -760,12 +774,18 @@ $\operatorname{div}\vec E = \rho/\varepsilon_0,\qquad \operatorname{rot}\vec E =
 \item Чим відрізняються «потік» і «циркуляція»?
 \end{enumerate}
 
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Як запам'ятати (1.49)} (→ [C]): rot A — визначник 3×3 з рядками (i j k), (∂/∂x ∂/∂y ∂/∂z), ($A_{x}$ $A_{y}$ $A_{z}$). У сучасному записі rot A = ∇ × A, div A = ∇ · A.
+\end{itemize}
+
 \chapter*{10–12. Поле зарядженої площини · двох площин · сферичної поверхні}\addcontentsline{toc}{chapter}{10–12. Поле зарядженої площини · двох площин · сферичної поверхні}\markboth{10–12. Поле зарядженої площини}{10–12. Поле зарядженої площини}
 
 \srcline{\book{} т. 2, застосування \textbf{§ 1.7} (с. 38–40); потенціали — у \textbf{§ 1.11} (с. 54–56). \ok{} Формули звірено зі сканом.}
 Один метод — три форми, тож вони добре вміщуються на одному розвороті зі спільною рамкою-«рецептом».
 
-\needspace{5\baselineskip}\section*{Рецепт (запишіть один раз, угорі)}
+\needspace{5\baselineskip}\section*{Рецепт (наш метод, не з книги; запишіть один раз, угорі)}
 \begin{enumerate}
 \item Із симетрії визначте \textbf{напрям} E.
 \item Оберіть замкнену \textbf{гауссову поверхню} (англ. Gaussian surface), на якій E стала або потік дорівнює 0.
@@ -791,7 +811,7 @@ $\operatorname{div}\vec E = \rho/\varepsilon_0,\qquad \operatorname{rot}\vec E =
 \item +σ і −σ. За \textbf{принципом суперпозиції} між площинами поля додаються, зовні — компенсуються.
 \item Між площинами: $E = \dfrac{\sigma}{\varepsilon_0}$ (1.35). Зовні: E = 0.
 \item Дві \textbf{однойменно} заряджені площини: між ними E = 0.
-\item Потенціал між площинами: $\varphi(x) = \varphi(0) - \dfrac{\sigma}{\varepsilon_0}x$, звідси $U = \dfrac{\sigma d}{\varepsilon_0}$ — плоский конденсатор (тема 15).
+\item Потенціал між площинами: $\varphi(x) = \varphi(0) - \dfrac{\sigma}{\varepsilon_0}x$ (с. 55).
 \item \pen{} Намалюйте рис. 1.19: дві пластини, три області, стрілки поля від кожної пластини та їхня сума.
 \item Пов'язане: поле біля самої поверхні провідника $E = \sigma/\varepsilon_0$ (1.36), с. 40 (тема 14).
 \end{itemize}
@@ -814,7 +834,7 @@ $\operatorname{div}\vec E = \rho/\varepsilon_0,\qquad \operatorname{rot}\vec E =
 \end{itemize}
 \end{itemize}
 
-\needspace{5\baselineskip}\section*{Підсумкова таблиця (добре підходить для низу сторінки)}
+\needspace{5\baselineskip}\section*{Підсумкова таблиця (наш підсумок; добре підходить для низу сторінки)}
 {\small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.180\linewidth}>{\raggedright\arraybackslash}p{0.240\linewidth}>{\raggedright\arraybackslash}p{0.324\linewidth}>{\raggedright\arraybackslash}p{0.192\linewidth}}
 \toprule
@@ -834,6 +854,12 @@ $\operatorname{div}\vec E = \rho/\varepsilon_0,\qquad \operatorname{rot}\vec E =
 \item Чому для площини виходить 1/(2ε₀), а біля поверхні провідника — 1/ε₀?
 \item Чому для площини E не залежить від відстані, а для сфери — залежить?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Напруга між площинами} (→ 11): підставте x = d у φ(x), тож $U = \dfrac{\sigma d}{\varepsilon_0}$. Це плоский конденсатор із теми 15.
+\end{itemize}
 
 \chapter*{13. Теорема Остроградського–Гаусса}\addcontentsline{toc}{chapter}{13. Теорема Остроградського–Гаусса}\markboth{13. Теорема Остроградського–Гаусса}{13. Теорема Остроградського–Гаусса}
 
@@ -966,30 +992,29 @@ $\oint_S A_n\,dS = \int_V \operatorname{div}\vec A\,dV$
 \needspace{5\baselineskip}\section*{[C] Плоский (с. 61)}
 \begin{itemize}
 \item Дві паралельні пластини площею S на відстані d ≪ розмірів пластин (крайовими ефектами нехтуємо).
-\item $U = Ed = \dfrac{\sigma}{\varepsilon_0}d$ (тема 11) ⟹ $C = \dfrac{\varepsilon_0\varepsilon S}{d}$
+\item У вакуумі: $\varphi_1-\varphi_2 = Ed = \dfrac{\sigma}{\varepsilon_0}d = \dfrac{q}{\varepsilon_0S}d$ (тема 11) ⟹ $C = \dfrac{\varepsilon_0S}{d}$ (1); з діелектриком $C = \dfrac{\varepsilon_0\varepsilon S}{d}$
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[D] Циліндричний (с. 61–62)}
 \begin{itemize}
 \item Два коаксіальні циліндри r₁ < r₂ висотою h ≫ r.
-\item $E = \dfrac{\tau}{2\pi\varepsilon_0\varepsilon r}$ ⟹ $U = \dfrac{\tau}{2\pi\varepsilon_0\varepsilon}\ln\dfrac{r_2}{r_1}$ ⟹ $C = \dfrac{2\pi\varepsilon_0\varepsilon h}{\ln(r_2/r_1)}$
+\item У вакуумі: $E = \dfrac{\eta}{2\pi\varepsilon_0 r}$ ⟹ $\varphi_1-\varphi_2 = \dfrac{\eta}{2\pi\varepsilon_0}\ln\dfrac{r_2}{r_1}$ ⟹ $C = \dfrac{2\pi\varepsilon_0h}{\ln(r_2/r_1)}$ (2); з діелектриком $C = \dfrac{2\pi\varepsilon_0\varepsilon h}{\ln(r_2/r_1)}$. η — лінійна густина заряду.
 \item Малий зазор d = r₂ − r₁ ≪ r₁ дає $C\approx\dfrac{2\pi\varepsilon_0\varepsilon r_1h}{d}$ — плоский конденсатор. \pen{} Варто записати, чому.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[E] Сферичний (с. 62)}
 \begin{itemize}
 \item Дві концентричні сфери r₁ < r₂.
-\item $U = \dfrac{q}{4\pi\varepsilon_0\varepsilon}\left(\dfrac1{r_1}-\dfrac1{r_2}\right)$ ⟹ $C = \dfrac{4\pi\varepsilon_0\varepsilon r_1r_2}{r_2-r_1}$
-\item При r₂ → ∞ виходить відокремлена куля $4\pi\varepsilon_0\varepsilon r_1$ — гарна перевірка.
+\item У вакуумі: $\varphi_1-\varphi_2 = \dfrac{q}{4\pi\varepsilon_0}\left(\dfrac1{r_1}-\dfrac1{r_2}\right)$ ⟹ $C = \dfrac{4\pi\varepsilon_0r_1r_2}{r_2-r_1}$ (3); з діелектриком $C = \dfrac{4\pi\varepsilon_0\varepsilon r_1r_2}{r_2-r_1}$
 \end{itemize}
 
-\needspace{5\baselineskip}\section*{Та сама схема тричі}
+\needspace{5\baselineskip}\section*{Та сама схема тричі (наш підсумок)}
 Знайти E (Гаусс) → проінтегрувати й отримати U → C = q/U. \pen{} Запишіть цей рядок над трьома малюнками.
 
 \needspace{5\baselineskip}\section*{Низ (с. 63)}
 \begin{itemize}
 \item \textbf{Робоча напруга} (англ. rated voltage) $U_{p}$: вище неї настає \textbf{пробій} (англ. breakdown).
-\item Необов'язково: двопровідна лінія, $C = \pi\varepsilon_0\varepsilon l/\ln(d/r)$ (приклад 1.3).
+\item Необов'язково: двопровідна лінія, $C \approx \pi\varepsilon_0h/\ln(d/r)$ для довжини h, d ≫ r (приклад 1.3, (4)).
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{Самоперевірка}
@@ -997,6 +1022,13 @@ $\oint_S A_n\,dS = \int_V \operatorname{div}\vec A\,dV$
 \item Чому конденсатори кращі за відокремлені провідники?
 \item Як три формули C показують, що «C залежить лише від геометрії та ε»?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Перевірка сферичного конденсатора} (→ [E]): при r₂ → ∞ (3) переходить у відокремлену кулю $C = 4\pi\varepsilon_0\varepsilon r_1$ з [A].
+\item \textbf{Позначення} (→ [D]): лінійну густину заряду книга позначає τ у (1.5), але η у розв'язаних прикладах (с. 40, 62). (1), (2), (3), (4) — номери всередині прикладів 1.2–1.3, а не рівняння розділу.
+\end{itemize}
 
 \chapter*{16. З'єднання конденсаторів}\addcontentsline{toc}{chapter}{16. З'єднання конденсаторів}\markboth{16. З'єднання конденсаторів}{16. З'єднання конденсаторів}
 
@@ -1072,12 +1104,11 @@ $\oint_S A_n\,dS = \int_V \operatorname{div}\vec A\,dV$
 \item Заряджаємо провідник порціями dq з нескінченності. Кожна потребує роботи $dA = \varphi\,dq = \dfrac{q}{C}dq$.
 \item Від 0 до q: $A = \dfrac{q^2}{2C}$ — вона й стає запасеною енергією.
 \item $W = \dfrac{q\varphi}{2} = \dfrac{C\varphi^2}{2} = \dfrac{q^2}{2C}$ (1.132)
-\item \pen{} Намалюйте графік: φ від q — пряма через 0, а \textbf{W — площа під нею}, трикутник. Звідси й ½.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[D] Конденсатор (с. 104)}
 \begin{itemize}
-\item Та сама формула, де φ замінено на U: $W = \dfrac{CU^2}{2} = \dfrac{qU}{2} = \dfrac{q^2}{2C}$ (1.133)
+\item (1.132) дає й енергію конденсатора, якщо φ замінити напругою Δφ = U. Для плоского конденсатора: $W_\text{п} = \tfrac12C\Delta\varphi^2$ (1.133)
 \item Наочно: заряд переносять з однієї обкладки на іншу.
 \end{itemize}
 
@@ -1086,6 +1117,14 @@ $\oint_S A_n\,dS = \int_V \operatorname{div}\vec A\,dV$
 \item Звідки береться ½? Дайте два пояснення: подвійний рахунок і трикутник.
 \item Як зміниться W, якщо q подвоїти? (У 4 рази.)
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Звідки ½} (→ [C]): на графіку φ–q залежність φ = q/C — пряма через 0, а робота $\int\varphi\,dq$ — площа під нею, трикутник. \pen{} Варто зробити невеликий рисунок.
+\item \textbf{Усі три форми для конденсатора} (→ [D]): $W = \dfrac{CU^2}{2} = \dfrac{qU}{2} = \dfrac{q^2}{2C}$ — з (1.132), де U = Δφ.
+\item \textbf{Позначення} (→ усі блоки): у §§ 1.25–1.26 книга позначає потенціальну енергію $W_\text{п}$. У § 1.6 для такої самої величини вжито W, у § 1.11 — U.
+\end{itemize}
 
 \chapter*{18. Енергія електростатичного поля}\addcontentsline{toc}{chapter}{18. Енергія електростатичного поля}\markboth{18. Енергія електростатичного поля}{18. Енергія електростатичного поля}
 
@@ -1101,20 +1140,20 @@ $\oint_S A_n\,dS = \int_V \operatorname{div}\vec A\,dV$
 
 \needspace{5\baselineskip}\section*{[A] Перетворення для плоского конденсатора (с. 104)}
 \begin{itemize}
-\item Беремо $W = \tfrac12 C(\Delta\varphi)^2$ і підставляємо $\Delta\varphi = Ed$, $C = \dfrac{\varepsilon_0\varepsilon S}{d}$:
-\item $W = \dfrac{\varepsilon_0\varepsilon E^2}{2}Sd = \dfrac{\varepsilon_0\varepsilon E^2}{2}V$ (1.134), де V = Sd — об'єм між пластинами.
+\item Беремо $W_\text{п} = \tfrac12 C\Delta\varphi^2$ (1.133) і підставляємо $\Delta\varphi = Ed$, $C = \dfrac{\varepsilon_0\varepsilon S}{d}$:
+\item $W_\text{п} = \dfrac{\varepsilon_0\varepsilon E^2}{2}Sd = \dfrac{\varepsilon_0\varepsilon E^2}{2}V$ (1.134), де V = Sd — об'єм між пластинами.
 \item Тепер енергію виражено через \textbf{поле E} і \textbf{об'єм}, без зарядів.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[B] Загальний випадок (с. 104)}
 \begin{itemize}
-\item Неоднорідне поле: $W = \dfrac12\int_V \varepsilon_0\varepsilon E^2\,dV$ (1.135)
+\item Неоднорідне поле: $W_\text{п} = \dfrac12\int_V \varepsilon_0\varepsilon E^2\,dV$ (1.135)
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[C] Густина енергії (с. 105)}
 \begin{itemize}
 \item \textbf{Об'ємна густина енергії електричного поля} (англ. energy density):
-$w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.136)
+$w = \dfrac12\varepsilon_0\varepsilon E^2 = \dfrac12\vec E\vec D$ (1.136)
 \item Тут $D = \varepsilon_0\varepsilon E$ — \textbf{вектор електричної індукції} (англ. electric displacement), означений у параграфах про діелектрики (§ 1.16 і далі). На сторінці досить одного рядка.
 \item Одиниця: Дж/м³.
 \end{itemize}
@@ -1132,6 +1171,12 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \item Теми 17 і 18 дають однакове W. У чому різниця між ними?
 \item Чому електромагнітна хвиля доводить, що енергія зосереджена в полі?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Густина як енергія на одиницю об'єму} (→ [C]): в однорідному полі w = W/V, з (1.134). Із сучасною крапкою: $w = \tfrac12\vec E\cdot\vec D$.
+\end{itemize}
 
 \chapter*{19. Електричний струм. Постійний електричний струм. Закони Ома}\addcontentsline{toc}{chapter}{19. Електричний струм. Постійний електричний струм. Закони Ома}\markboth{19. Електричний струм. Постійний електричний струм.…}{19. Електричний струм. Постійний електричний струм.…}
 
@@ -1183,7 +1228,7 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \item $U = IR = \mathcal E - Ir$ (2.35). Розімкнене коло: U = ℰ. Коротке замикання: $I_{max} = \mathcal E/r$ (2.37).
 \end{itemize}
 
-\needspace{5\baselineskip}\section*{Три форми закону Ома (добре підходить для низу сторінки)}
+\needspace{5\baselineskip}\section*{Три форми закону Ома (наш підсумок; добре підходить для низу сторінки)}
 {\small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.394\linewidth}>{\raggedright\arraybackslash}p{0.574\linewidth}}
 \toprule
@@ -1226,11 +1271,11 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \needspace{5\baselineskip}\section*{[B] Густина струму (с. 107–109)}
 \begin{itemize}
 \item $j = \dfrac{dI}{dS_\perp}$ (2.4) — \textbf{вектор}, напрямлений за дрейфом позитивних носіїв (англ. current density).
-\item Через носії: $\vec j = n_0 e\vec v_d$ (2.6), де n₀ — концентрація, $v_{d}$ — \textbf{дрейфова швидкість} (англ. drift velocity).
-\item Для електронів: $\vec j = -n_0|e|\vec v_d$ (2.7).
-\item $I = \int_S j_n\,dS$ (2.9). Рівномірний струм: $I = n_0ev_dS = jS$ (2.10). Одиниця А/м².
+\item Через носії: $\vec j = n_0 e\vec v_{\text{д}}$ (2.6), де n₀ — концентрація, $v_{\text{д}}$ — \textbf{дрейфова швидкість} (англ. drift velocity).
+\item Для електронів: $\vec j = -n_0|e|\vec v_{\text{д}}$ (2.7).
+\item $I = \int_S j_n\,dS$ (2.9). Рівномірний струм: $I = n_0ev_{\text{д}}S = jS$ (2.10). Одиниця А/м².
 \item Зауважте: середнє значення вектора швидкості хаотичного руху дорівнює 0, тож струм переносить лише дрейф.
-\item \pen{} Намалюйте рис. 2.1а: циліндр з основою dS і довжиною $v_{d}$·dt; усе, що в ньому, проходить крізь dS за час dt.
+\item \pen{} Намалюйте рис. 2.1а: циліндр з основою dS і довжиною $v_{\text{д}}$·dt; усе, що в ньому, проходить крізь dS за час dt.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[C] Рівняння неперервності (с. 109–110)}
@@ -1251,9 +1296,9 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \needspace{5\baselineskip}\section*{[E] Електрорушійна сила (с. 118)}
 \begin{itemize}
 \item «Скалярну величину ℰ, яка дорівнює \textbf{роботі сторонніх сил, віднесеній до одиниці позитивного заряду}, називають електрорушійною силою (ЕРС)» (англ. electromotive force, emf)
-\item $\mathcal E = \dfrac{A_{\text{ст}}}{q}$ (2.28); у замкненому колі $\mathcal E = \oint \vec E_{\text{ст}}d\vec l$ (2.29) — \textbf{циркуляція поля сторонніх сил}. На ділянці 1–2: $\mathcal E_{12} = \int_1^2\vec E_{\text{ст}}d\vec l$ (2.30).
+\item $\mathcal E = \dfrac{A}{q}$ (2.28), де A — робота сторонніх сил; у замкненому колі $\mathcal E = \oint \vec E_{\text{ст}}d\vec l$ (2.29) — \textbf{циркуляція поля сторонніх сил}. На ділянці 1–2: $\mathcal E_{12} = \int_1^2\vec E_{\text{ст}}d\vec l$ (2.30).
 \item Попри назву, це \textbf{не сила}, а енергетична характеристика джерела; вимірюється у вольтах.
-\item Порівняйте з темою 9: циркуляція E дорівнює 0, а циркуляція $E_{\text{ст}}$ дорівнює ℰ ≠ 0. Саме ця ненульова циркуляція й підтримує струм.
+\item Порівняйте з темою 9: циркуляція E дорівнює 0, а циркуляція $E_{\text{ст}}$ дорівнює ℰ ≠ 0. Саме ця ненульова циркуляція й підтримує струм (с. 117–118).
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{Самоперевірка}
@@ -1307,8 +1352,8 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \begin{itemize}
 \item \textbf{Потужність} (англ. power) — робота за одиницю часу.
 \item \textbf{Корисна} (англ. useful power; у навантаженні R): $P = IU = I^2R = \dfrac{U^2}{R}$ (2.43) $= \dfrac{\mathcal E^2R}{(R+r)^2}$ (2.44)
-\item \textbf{Загальна} (англ. total power): $P_{\text{заг}} = \mathcal EI = \dfrac{\mathcal E^2}{R+r}$ (2.45)
-\item \textbf{ККД} (англ. efficiency): $\eta = \dfrac{P}{P_{\text{заг}}} = \dfrac{R}{R+r}$ (2.46)
+\item \textbf{Загальна} (англ. total power): $P_{\text{дж}} = \mathcal EI = \dfrac{\mathcal E^2}{R+r}$ (2.45)
+\item \textbf{ККД} (англ. efficiency): $\eta = \dfrac{P}{P_{\text{дж}}} = \dfrac{R}{R+r}$ (2.46)
 \item Максимальна корисна потужність при \textbf{R = r}: $P_{max} = \dfrac{\mathcal E^2}{4r}$, але тоді η = 50 \%.
 \item \pen{} Графік P(R): нуль при R = 0, максимум при R = r, прямує до 0 при R → ∞. Поверх — η(R), що зростає до 1.
 \end{itemize}
@@ -1318,6 +1363,12 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \item Чому не можна одночасно мати максимальну потужність і максимальний ККД?
 \item Чому опір металів зростає при нагріванні?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Позначення} (→ [E]): $P_{\text{дж}}$ у книзі — загальна потужність джерела (дж = джерело). Повну роботу позначено $A_{\text{заг}}$ (2.41). ККД тут η — та сама літера, що й в'язкість у т. 1 та лінійна густина заряду в прикладах § 1.7.
+\end{itemize}
 
 \chapter*{22. Перший та другий закон Кірхгофа}\addcontentsline{toc}{chapter}{22. Перший та другий закон Кірхгофа}\markboth{22. Перший та другий закон Кірхгофа}{22. Перший та другий закон Кірхгофа}
 
@@ -1415,7 +1466,7 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \needspace{5\baselineskip}\section*{[C] Диференціальна форма (с. 124)}
 \begin{itemize}
 \item \textbf{Питома потужність струму} (англ. power density) — теплота на одиницю об'єму за одиницю часу: $w = \dfrac{dQ}{dV\,dt}$
-\item $w = \rho j^2$ (2.48), $w = \sigma E^2$ (2.49), $w = \vec j\cdot\vec E$ (2.50)
+\item $w = \rho j^2$ (2.48), $w = \sigma E^2$ (2.49), $w = \vec j\vec E$ (2.50)
 \item Інтегрування за об'ємом і часом повертає (2.47). Знову локальна vs інтегральна форма, як для закону Ома.
 \end{itemize}
 
@@ -1426,7 +1477,7 @@ $w = \dfrac{W}{V} = \dfrac{\varepsilon_0\varepsilon E^2}{2} = \dfrac{ED}{2}$ (1.
 \item Подробиці про пондеромоторні сили — \textbf{необов'язкові}, їх можна пропустити.
 \end{itemize}
 
-\needspace{5\baselineskip}\section*{Пара із законом Ома (добре підходить для низу сторінки)}
+\needspace{5\baselineskip}\section*{Пара із законом Ома (наш підсумок; добре підходить для низу сторінки)}
 {\small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.291\linewidth}>{\raggedright\arraybackslash}p{0.291\linewidth}>{\raggedright\arraybackslash}p{0.370\linewidth}}
 \toprule
@@ -1611,6 +1662,13 @@ $p = \dfrac23\dfrac1{l^3}\sum_{i=1}^n\dfrac{m_{0i}v_i^2}{2}$ (14.5)
 \item Що стане з ⟨v²⟩, якщо T подвоїти? (Зросте вдвічі, отже $v_{\text{кв}}$ — у √2 раза.)
 \end{enumerate}
 
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Позначення швидкостей і ⟨ ⟩} (→ [B], [C]): книга пише середнє від v² як $\langle v_{\text{кв}}^2\rangle$, тож середня квадратична швидкість $v_{\text{кв}} = \sqrt{\langle v_{\text{кв}}^2\rangle}$. В англомовних текстах — $v_{rms}$ або $\sqrt{\overline{v^2}}$; замість ⟨ ⟩ часто ставлять риску зверху. $m_0$ у книзі — маса однієї молекули (часто просто m).
+\item \textbf{Дві атмосфери} (→ [C], с. 304): фізична 1 атм = 101 325 Па і технічна 1 ат = 98 066,5 Па ≈ 0,98 бар. Не плутайте їх.
+\end{itemize}
+
 \chapter*{1. Закони ідеальних газів}\addcontentsline{toc}{chapter}{1. Закони ідеальних газів}\markboth{1. Закони ідеальних газів}{1. Закони ідеальних газів}
 
 \srcline{\book{} т. 1, \textbf{§ 14.6} «Рівняння стану ідеального газу» (с. 311–313), \textbf{§ 14.7} «Основні закони ідеального газу» (с. 313–317). \ok{} (14.13)–(14.18) звірено зі сканом; (14.22)–(14.31) — з чіткого OCR.}
@@ -1629,9 +1687,9 @@ $p = \dfrac23\dfrac1{l^3}\sum_{i=1}^n\dfrac{m_{0i}v_i^2}{2}$ (14.5)
 \begin{itemize}
 \item \textbf{Термічне рівняння стану} (англ. thermal equation of state): рівняння, що пов'язує p, V, T у стані теплової рівноваги, $F(p, V, T) = 0$ (14.12).
 \item З МКТ: $p = n_0kT$ (14.13) ⟹ $pV = nkT$ (14.14), де n — кількість молекул.
-\item Для одного моля: $pV_M = N_AkT$ (14.15). З \textbf{молярною газовою сталою} (англ. molar gas constant) $R = kN_A = 8{,}31$ Дж/(моль·К):
+\item Для одного моля: $pV_M = N_AkT$ (14.15). З \textbf{молярною газовою сталою} (англ. molar gas constant) $R = kN_A = 8{,}31451$ Дж/(моль·К):
 $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
-\item Для довільної кількості речовини, ν = m/M молів:
+\item Для ν молів: $pV = \nu RT$ (14.17). Оскільки ν = m/M = n/$N_{A}$:
 \[pV = \frac mM RT,\quad\text{\text{або}}\quad pV = \frac{n}{N_A}RT\qquad(14.18)\]
 — \textbf{рівняння Клапейрона–Менделєєва} (англ. ideal gas law).
 \item Зміст R (с. 313): робота розширення 1 моля ідеального газу при \textbf{ізобарному} нагріванні на 1 К. \pen{} Намалюйте поршень із рис. 14.4.
@@ -1680,6 +1738,12 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \item Чому ізобари на графіку V–T проходять через початок координат (у кельвінах)?
 \item Який фізичний зміст R?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Позначення: n, n₀, ν, $V_{M}$} (→ [A]): книга позначає число молекул \textbf{n}, а концентрацію (молекул на м³) — \textbf{n₀} = n/V. У багатьох англомовних текстах число молекул — N, концентрація — n, тож та сама літера n означає різне. ν — кількість речовини в молях, M — молярна маса (у старіших текстах μ), $V_{M}$ — молярний об'єм. Книга згадує й питому газову сталу B: pV = mBT (приклад 14.1).
+\end{itemize}
 
 \chapter*{20. Закон рівномірного розподілу енергії по ступенях свободи · 21. Внутрішня енергія ідеальних газів}\addcontentsline{toc}{chapter}{20. Закон рівномірного розподілу енергії по ступенях свободи · 21. Внутрішня енергія ідеальних газів}\markboth{20. Закон рівномірного розподілу енергії по ступенях свободи}{20. Закон рівномірного розподілу енергії по ступенях свободи}
 
@@ -1736,7 +1800,6 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \item В ідеальному газі \textbf{взаємодії немає}, тож U — лише кінетична енергія: «внутрішня енергія ідеального газу дорівнює сумарній кінетичній енергії його молекул» (с. 390) (англ. internal energy).
 \item Один моль одноатомного газу: $U = \dfrac32RT$ (16.2). Загалом:
 \[U = \frac i2RT\qquad(16.3)\]
-а для ν молів $U = \nu\dfrac i2RT$.
 \item Головний висновок (с. 392): «внутрішня енергія ідеального газу є функцією \textbf{тільки абсолютної температури}». Від V вона не залежить. На цьому ґрунтуються процеси блоку E.
 \end{itemize}
 
@@ -1752,6 +1815,12 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \item Чому на коливальний ступінь вільності припадає kT, а не ½kT?
 \item Чому U ідеального газу не залежить від об'єму?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{ν молів} (→ [D]): U = ν(i/2)RT, бо (16.3) записано для одного моля.
+\end{itemize}
 
 \chapter*{18. Закон розподілу Максвела}\addcontentsline{toc}{chapter}{18. Закон розподілу Максвела}\markboth{18. Закон розподілу Максвела}{18. Закон розподілу Максвела}
 
@@ -1824,6 +1893,12 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \item Розташуйте $v_{\text{н}}$, ⟨v⟩ і $v_{\text{кв}}$ за зростанням і поясніть чому.
 \end{enumerate}
 
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Назви трьох швидкостей} (→ [D]): $v_\text{н}$ у книзі (найбільш імовірна) — в англомовних текстах $v_p$ (most probable speed); ⟨v⟩ — $\bar v$ (mean speed); $v_{\text{кв}}$, часто надруковане як $\langle v_{\text{кв}}\rangle$, — $v_{rms}$. Книга також називає $v_{\text{кв}}$ \textbf{тепловою швидкістю} (с. 318).
+\end{itemize}
+
 \chapter*{17. Закон розподілу Больцмана · 19. Закон розподілу Максвела-Больцмана}\addcontentsline{toc}{chapter}{17. Закон розподілу Больцмана · 19. Закон розподілу Максвела-Больцмана}\markboth{17. Закон розподілу Больцмана}{17. Закон розподілу Больцмана}
 
 \srcline{\book{} т. 1, \textbf{§ 14.11} «Барометрична формула. Розподіл Максвелла — Больцмана» (с. 331–337). \ok{} (14.64)–(14.75) звірено зі сканом.}
@@ -1868,12 +1943,13 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 де φ = gh — потенціал.
 \item \textbf{Два незалежні множники}: больцманівський $e^{-m_0\Delta\varphi/kT}$ (положення) × максвеллівський $e^{-m_0v^2/2kT}$ (швидкість).
 \item Отже, розподіл Больцмана не залежить від розподілу за швидкостями, а розподіл Максвелла — від потенціалу.
-\item \pen{} Як запам'ятати: $e^{-(E_\text{п} + E_\text{к})/kT}$ — енергія, поділена на kT, у показнику.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[D] Необов'язково}
 \begin{itemize}
-\item Атмосфери планет (с. 333–334): другу космічну швидкість перевищують лише молекули з «хвоста» розподілу Максвелла, тому легкі небесні тіла (Місяць) втрачають атмосферу.
+\item Атмосфери планет (с. 333–334): другу космічну швидкість перевищують лише молекули з «хвоста» розподілу Максвелла, тому легкі небесні тіла (Місяць) втрачають атмосферу. Урахувавши спадання g з висотою, книга дістає (14.69), де p ≠ 0 навіть при h = ∞; цей парадокс розв'язано на с. 334.
+\item \textbf{Міжнародна стандартна атмосфера (МСА)} (англ. ISA) (с. 334–335): на рівні моря 1,013·10⁵ Па при 15 °C, температура спадає до −56,5 °C на 11 км (умовний початок стратосфери); за нею градуюють альтиметри на літальних апаратах. \warn{} Книга друкує вертикальний градієнт \textbf{5,6 К/км}, але її ж числа дають (15 + 56,5)/11 = \textbf{6,5 К/км} — стандартне значення МСА: цифри переставлено.
+\item Також для авіації й космонавтики (с. 334): аеродинамічний опір на Землі стає малим вище приблизно 190–200 км, що уможливлює тривалий орбітальний політ; «космічні» умови починаються приблизно зі 100 км на Марсі та 300 км на Венері. Висоту визначають за барометричною формулою з поправками на температуру (рис. 14.17).
 \item Флуктуації (Смолуховський, с. 335): $\delta = \sqrt{\dfrac2\pi\dfrac1n}$ (14.72) — тим менші, чим більше частинок.
 \item Дослід Перрена (§ 14.12) використав закон Больцмана, щоб виміряти $N_{A.}$
 \end{itemize}
@@ -1884,6 +1960,14 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \item Чому барометрична формула хибна на великих висотах? (Змінюються T і g.)
 \item Що означає, що розподіл Максвелла–Больцмана розпадається на два множники?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Як запам'ятати} (→ [C]): обидва множники (14.74) об'єднуються в $e^{-(E_\text{п} + E_\text{к})/kT}$ — повна енергія, поділена на kT, у показнику.
+\item \textbf{n і n₀ тут} (→ [B]): у (14.70)–(14.71) n і n₀ — \textbf{концентрації} на висотах h і h₀, а в § 14.6 n — число молекул, n₀ — концентрація. У (14.73)–(14.74) n — знову число молекул.
+\item \textbf{Двічі γ} (→ [D]): на с. 333 книга позначає гравітаційну сталу γ — тією самою літерою, що й показник адіабати γ = $C_{p}$/$C_{V.}$ У сучасних текстах гравітаційна стала — G.
+\end{itemize}
 
 \chapter*{22. Середня довжина вільного пробігу молекули в газах}\addcontentsline{toc}{chapter}{22. Середня довжина вільного пробігу молекули в газах}\markboth{22. Середня довжина вільного пробігу молекули в газах}{22. Середня довжина вільного пробігу молекули в газах}
 
@@ -1918,7 +2002,7 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \needspace{5\baselineskip}\section*{[C] Ефективний переріз (с. 344–345)}
 \begin{itemize}
 \item \textbf{Повний ефективний поперечний переріз} (англ. effective cross-section) σ = πd². Вимірюється в м², але геометричного змісту не має: характеризує \textbf{імовірність} процесу зіткнення.
-\item \textbf{Ефективний діаметр} зменшується з ростом T (Сезерленд): $d^2 = d_0^2(1 + C/T)$ (15.3), тож ⟨l⟩ зростає з T.
+\item \textbf{Ефективний діаметр} зменшується з ростом T (Сезерленд): $d = d_0\sqrt{1 + C/T}$ (15.3), тож ⟨l⟩ зростає з T.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[D] Порядки величин і залежності (с. 345)}
@@ -1976,7 +2060,7 @@ $pV_M = RT$ (14.16) — \textbf{рівняння Клапейрона}.
 \item \textbf{Закон Фіка} (перший) (англ. Fick's law): $j_m = -D\dfrac{d\rho}{dx}$ (15.22), D — \textbf{коефіцієнт дифузії}, м²/с.
 \item З кінетичної теорії: $D = \tfrac13\langle v\rangle\langle l\rangle$ (15.27)
 \item D ∝ 1/p при T = const і зростає з T.
-\item Необов'язково: нестаціонарна дифузія $\Delta n = \Delta n_0e^{-t/\tau}$ (15.29); другий закон Фіка $\partial n/\partial t = D\,\partial^2n/\partial x^2$ (15.30); взаємна дифузія й термодифузія (с. 360–363).
+\item Необов'язково: нестаціонарна дифузія $\Delta n_0 = \Delta n_{00}e^{-t/\tau}$ (15.29); другий закон Фіка $\partial n_0/\partial t = D\,\partial^2n_0/\partial x^2$ (15.30); взаємна дифузія й термодифузія (с. 360–363).
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[C] Внутрішнє тертя (в'язкість) (24) (с. 348–350)}
@@ -2018,6 +2102,13 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item Що саме «несе» молекула в кожному з трьох явищ?
 \item Звідки множник ⅓ (= 2 × ⅙)?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Літери з двома значеннями} (→ [C], [D]): ν тут — кінематична в'язкість η/ρ, а деінде — кількість речовини в молях; λ тут — теплопровідність (в англомовних текстах часто k або κ), а в оптиці — довжина хвилі; η тут — в'язкість, а в темах 12–13 — ККД. Мале $c_V$ — питома теплоємність (на кг), велике $C_V$ — молярна: $C_V = Mc_V$ (16.9).
+\item \textbf{Позначення потоків} (→ [B], [D]): книга пише густину потоку маси $j_m$ і густину теплового потоку $j_q$; в англомовних текстах — часто J і q (або $\vec q$) для теплового потоку.
+\end{itemize}
 
 \chapter*{3. Внутрішня енергія термодинамічної системи}\addcontentsline{toc}{chapter}{3. Внутрішня енергія термодинамічної системи}\markboth{3. Внутрішня енергія термодинамічної системи}{3. Внутрішня енергія термодинамічної системи}
 
@@ -2157,6 +2248,13 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item У чому фізична різниця між теплотою і роботою?
 \end{enumerate}
 
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Знак роботи: дві домовленості} (→ [A]): ця книга (як і більшість фізичних та інженерних текстів) вважає A роботою, виконаною \textbf{системою}, тож $d\text{'}Q = dU + d\text{'}A$. У хімії та за IUPAC W — робота, виконана \textbf{над} системою, і $\Delta U = Q + W$. Фізика та сама, знак доданка з роботою протилежний. Перш ніж переписати формулу з іншого джерела, перевірте, яку домовленість воно вживає.
+\item \textbf{d′ чи δ} (→ [B]): книга позначає неповний диференціал штрихом: d′Q, d′A. В інших текстах — δQ, δA або đQ. Усе це одне: мала кількість, яка не є зміною функції стану.
+\end{itemize}
+
 \chapter*{6. Перший закон термодинаміки}\addcontentsline{toc}{chapter}{6. Перший закон термодинаміки}\markboth{6. Перший закон термодинаміки}{6. Перший закон термодинаміки}
 
 \srcline{\book{} т. 1, \textbf{§ 16.2} «Перший закон термодинаміки» (с. 374, 381–383). \ok{} (16.10)–(16.17) звірено зі сканом.}
@@ -2187,7 +2285,7 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \needspace{5\baselineskip}\section*{[C] Інші форми (с. 382)}
 \begin{itemize}
 \item Форма через теплоту, зручна для теплотехніки: $d\text{'}Q = dU + d\text{'}A$ (16.11). Словами: надана теплота \textbf{йде на} збільшення U і виконання роботи.
-\item Інтегральна форма: $Q = (U_2 - U_1) + A$ (16.12)
+\item Інтегральна форма: $Q = (U_2 - U_1) + A_{12}$ (16.12)
 \item Цикл (U₂ = U₁): $Q = A$ (16.13) — уся отримана теплота перетворюється на роботу.
 \item Якщо d'Q = 0, процес \textbf{адіабатний} (тема 10).
 \end{itemize}
@@ -2212,6 +2310,13 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item Чому вічний двигун першого роду неможливий?
 \end{enumerate}
 
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Знак роботи: дві домовленості} (→ [B]): ця книга (як і більшість фізичних та інженерних текстів) вважає A роботою, виконаною \textbf{системою}, тож $d\text{'}Q = dU + d\text{'}A$. У хімії та за IUPAC W — робота, виконана \textbf{над} системою, і $\Delta U = Q + W$. Фізика та сама, знак доданка з роботою протилежний. Перш ніж переписати формулу з іншого джерела, перевірте, яку домовленість воно вживає.
+\item \textbf{d′ чи δ} (→ [B]): книга позначає неповний диференціал штрихом: d′Q, d′A. В інших текстах — δQ, δA або đQ. Усе це одне: мала кількість, яка не є зміною функції стану.
+\end{itemize}
+
 \chapter*{5. Теплоємність ідеальних газів}\addcontentsline{toc}{chapter}{5. Теплоємність ідеальних газів}\markboth{5. Теплоємність ідеальних газів}{5. Теплоємність ідеальних газів}
 
 \srcline{\book{} т. 1, \textbf{§ 16.2} (рівняння Майєра, с. 382–383), \textbf{§ 16.5} «Теплоємність ідеального газу» (с. 390–397). \ok{} (16.16)–(16.19), (16.46) і таблицю $C_{V}$/$C_{p}$ звірено зі сканом.}
@@ -2222,7 +2327,7 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 ┌ [A] C_V = dU/dT; C_p — більше; рівняння Майєра (16.19) у рамці        ┐
 ├ [B] Класична теорія: C_V = (i/2)R, C_p = ((i+2)/2)R, γ = (i+2)/i — таблиця ┤
 ├ [C] Графік C_V(T) для двохатомного газу (рис. 16.7): сходинки 3/2 → 5/2 → 7/2 ┤
-└ [D] Чому: квантування; характеристичні температури T_оберт, T_колив      ┘
+└ [D] Чому: квантування; характеристичні температури T_оберт, T_кол      ┘
 \end{layout}
 
 \needspace{5\baselineskip}\section*{[A] Рівняння Майєра (с. 382–383) — у рамку}
@@ -2239,7 +2344,7 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 
 \needspace{5\baselineskip}\section*{[B] Класична теорія (с. 390–392)}
 \begin{itemize}
-\item З U = (i/2)RT: $C_V = \dfrac i2R$, $C_p = \dfrac{i+2}2R$, $\gamma = \dfrac{C_p}{C_V} = \dfrac{i+2}i$
+\item Книга наводить $C_{V}$ і $C_{p}$ для кожного типу газу (с. 392); стовпець γ — наше $C_{p}$/$C_{V.}$
 \end{itemize}
 {\footnotesize
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.460\linewidth}>{\raggedright\arraybackslash}p{0.077\linewidth}>{\raggedright\arraybackslash}p{0.096\linewidth}>{\raggedright\arraybackslash}p{0.096\linewidth}>{\raggedright\arraybackslash}p{0.192\linewidth}}
@@ -2267,14 +2372,14 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item кімнатні T: 5/2 R («увімкнулося» обертання);
 \item тисячі К: прямує до 7/2 R (вмикаються коливання, але молекули раніше дисоціюють).
 \end{itemize}
-\item \pen{} Намалюйте «сходинки» $C_{V}$(T) з переходами при $T_{\text{оберт}}$ і $T_{\text{колив}.}$
+\item \pen{} Намалюйте «сходинки» $C_{V}$(T) з переходами при $T_{\text{оберт}}$ і $T_{\text{кол}.}$
 \end{enumerate}
 
 \needspace{5\baselineskip}\section*{[D] Квантове пояснення (с. 394–397), коротко}
 \begin{itemize}
-\item Енергії обертання й коливань \textbf{квантуються}: $\varepsilon_{\text{пост}} \ll \varepsilon_{\text{оберт}} \ll \varepsilon_{\text{колив}}$, звідси \textbf{характеристичні температури} (англ. characteristic temperatures) $T_{\text{пост}} \ll T_{\text{оберт}} \ll T_{\text{колив}}$.
-\item Нижче $T_{\text{оберт}}$ чи $T_{\text{колив}}$ енергії kT замало, щоб збудити відповідний рух, тож ці ступені вільності «заморожені».
-\item Значення: $T_{\text{оберт}}$ для H₂ — 85 К, для N₂ — 2,85 К; $T_{\text{колив}}$ для N₂ — 3340 К, для O₂ — 2240 К.
+\item Енергії обертання й коливань \textbf{квантуються}: $\varepsilon_{\text{пост}} \ll \varepsilon_{\text{оберт}} \ll \varepsilon_{\text{кол}}$, звідси \textbf{характеристичні температури} (англ. characteristic temperatures) $T_{\text{пост}} \ll T_{\text{оберт}} \ll T_{\text{кол}}$.
+\item Нижче $T_{\text{оберт}}$ чи $T_{\text{кол}}$ енергії kT замало, щоб збудити відповідний рух, тож ці ступені вільності «заморожені».
+\item Значення: $T_{\text{оберт}}$ для H₂ — 85 К, для N₂ — 2,85 К; $T_{\text{кол}}$ для N₂ — 3340 К, для O₂ — 2240 К.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{Самоперевірка}
@@ -2283,6 +2388,13 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item Чому двохатомний H₂ при 60 К поводиться як одноатомний?
 \item Яке γ брати для повітря і чому?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Загальні формули} (→ [B]): з U = (i/2)RT, $C_V = \dfrac i2R$, $C_p = \dfrac{i+2}2R$, $\gamma = \dfrac{C_p}{C_V} = \dfrac{i+2}i$. Для i = 3, 5, 6 вони дають таблицю книги.
+\item \textbf{Індекси} (→ [D]): коливальні величини книга позначає «колив» у (16.4), але «кол» у § 16.5 ($T_{\text{кол}}$, $\varepsilon_{\text{кол}}$). В англомовних текстах характеристичні температури — $θ_{rot}$, $θ_{vib}$ (або Θ\_r, Θ\_v).
+\end{itemize}
 
 \chapter*{7. Ізотермічний процес · 8. Ізохоричний процес · 9. Ізобарний процес}\addcontentsline{toc}{chapter}{7. Ізотермічний процес · 8. Ізохоричний процес · 9. Ізобарний процес}\markboth{7. Ізотермічний процес}{7. Ізотермічний процес}
 
@@ -2339,9 +2451,9 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \midrule
 \endhead
 ізобарний & $C_{p}$ & 0 \\
-ізотермічний & ∞ & 1 \\
+ізотермічний & ±∞ & 1 \\
 адіабатний & 0 & γ \\
-ізохорний & $C_{V}$ & ±∞ \\
+ізохорний & $C_{V}$ & → ∞ \\
 \bottomrule
 \end{longtable}
 }
@@ -2526,9 +2638,6 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \begin{itemize}
 \item Обхід проти годинникової стрілки: робота \textbf{зовнішніх сил} переносить теплоту від \textbf{холоднішого} тіла до \textbf{гарячішого}.
 \item \textbf{Холодильна машина} (англ. refrigerator): $\varepsilon = \dfrac{Q_2}{A}$ (16.68) — \textbf{холодильний коефіцієнт} (англ. coefficient of performance): теплота, відібрана від холодного тіла, на одиницю роботи.
-\begin{itemize}
-\item Для оберненого циклу Карно з (16.64) випливає $\varepsilon = \dfrac{T_2}{T_1 - T_2}$. \warn{} Це виведено тут; у книзі цієї формули немає.
-\end{itemize}
 \item \textbf{Тепловий насос} (англ. heat pump): $\varphi = \dfrac{Q_1}{A} = \dfrac{T_1}{T_1 - T_2}$ (16.67) — \textbf{коефіцієнт перетворення}: теплота, передана теплому тілу, на одиницю роботи. Може бути > 1.
 \end{itemize}
 
@@ -2548,6 +2657,14 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item Куди дівається робота на двох адіабатах?
 \item Чому φ теплового насоса може бути більшим за 1, не порушуючи закону збереження енергії?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Холодильна машина на оберненому циклі Карно} (→ [D]): з (16.64) $\varepsilon = \dfrac{T_2}{T_1 - T_2}$. Зауважте, що φ = ε + 1, бо Q₁ = Q₂ + A.
+\item \textbf{Знак Q₂} (→ [B], [C]): на с. 400 книга пише, що газ віддає холодильнику «Q₂ (Q₂ < 0)», але (16.53) і (16.57) вживають Q₂ як додатну величину, а (16.65) — |Q₂|. У § 16.8 (тема 16) Q₂ знову зі знаком. Правило: у η = 1 − Q₂/Q₁ величина Q₂ — \textbf{модуль} відданої теплоти; у нерівності Клаузіуса Q₁/T₁ + Q₂/T₂ ≤ 0 — \textbf{зі знаком} (від'ємна).
+\item \textbf{Назви коефіцієнтів} (→ [D]): холодильний коефіцієнт ε — в англомовних текстах coefficient of performance $COP_{R}$; коефіцієнт перетворення φ — $COP_{HP.}$ Термічний ККД у книзі — η або $\eta_\text{т}$.
+\end{itemize}
 
 \chapter*{16. Другий закон термодинаміки}\addcontentsline{toc}{chapter}{16. Другий закон термодинаміки}\markboth{16. Другий закон термодинаміки}{16. Другий закон термодинаміки}
 
@@ -2616,7 +2733,7 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \begin{layout}
 ┌ [A] Означення: dS = d'Q/T (16.75) — рамка; Клаузіус 1854          ┐
 ├ [B] Властивості: функція стану · адитивна · до сталої (16.76)      ┤
-├ [C] Закон зростання ентропії: dS ≥ d'Q/T (16.81), ізольована dS ≥ 0 (16.82) ┤
+├ [C] Закон зростання ентропії: dS > d'Q/T (16.81), ізольована dS > 0 (16.82) ┤
 ├ [D] ΔS для процесів ідеального газу (приклад 16.4) — табличка     ┤
 ├ [E] Статистичний зміст: S = k ln w (16.91); мікро-/макростан; рис. 16.15 ┤
 └ низ: основне рівняння TdS = dU + pdV (16.84); «теплова смерть» — чому ні ┘
@@ -2639,9 +2756,9 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 
 \needspace{5\baselineskip}\section*{[C] Закон зростання ентропії (с. 406–408)}
 \begin{itemize}
-\item Необоротний перехід A→B з оборотним поверненням (рис. 16.14) дає $S_2 - S_1 > \int_1^2\dfrac{d\text{'}Q}T$ (16.80). Загалом:
-\[dS \ge \frac{d\text{'}Q}T\qquad(16.81)\]
-\item \textbf{Ізольована} система (d'Q = 0): $dS \ge 0$ (16.82). Рівність — для оборотних процесів у рівновазі (16.83).
+\item Необоротний перехід A→B з оборотним поверненням (рис. 16.14) дає $S_2 - S_1 > \int_1^2\dfrac{d\text{'}Q}T$ (16.80). Для нескінченно малого необоротного кроку:
+\[dS > \frac{d\text{'}Q}T\qquad(16.81)\]
+\item \textbf{Ізольована} система (d'Q = 0): $dS > 0$ (16.82) для необоротних процесів; $dS = 0$ (16.83) у рівновазі, коли всі процеси оборотні.
 \item «ентропія замкненої системи \textbf{не може зменшуватись}; вона або зростає, якщо в системі відбуваються необоротні процеси, або залишається незмінною …». Ентропія — \textbf{міра необоротності}.
 \end{itemize}
 
@@ -2653,14 +2770,14 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \midrule
 \endhead
 адіабатний (оборотний) & 0, \textbf{ізоентропійний} (англ. isentropic) \\
-ізотермічний & Q/T = R ln(V₂/V₁) \\
+ізотермічний & Q/T \\
 ізохорний & $C_{V}$ ln(T₂/T₁) \\
 ізобарний & $C_{p}$ ln(T₂/T₁) \\
 \bottomrule
 \end{longtable}
 }
 \begin{itemize}
-\item Загалом (приклад 16.5): $\Delta S = \nu C_V\ln\dfrac{T_2}{T_1} + \nu R\ln\dfrac{V_2}{V_1}$
+\item Будь-який квазістатичний процес (приклад 16.5, $C_{V}$ стала): $\Delta S = \dfrac mMC_V\ln T + \dfrac mMR\ln V$, як надруковано: невизначена форма, з точністю до сталої.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[E] Статистичний зміст (с. 411–413)}
@@ -2678,7 +2795,7 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \begin{itemize}
 \item Основне рівняння (16.84): $T\,dS = dU + p\,dV$ — перший і другий закони разом.
 \item \textbf{«Теплова смерть Всесвіту»} (с. 413–414): висновок хибний, бо Всесвіт не є термодинамічною системою.
-\item Необов'язково: характеристичні функції H = U + pV, F = U − TS, G = U − TS + pV (с. 408–409).
+\item Необов'язково: характеристичні функції (с. 408–409): ентальпія I = U + pV, вільна енергія F = U − TS (16.87), термодинамічний потенціал Гіббса Z = U − TS + pV (16.88).
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{Самоперевірка}
@@ -2687,6 +2804,15 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item Чи може ентропія ізольованої системи зменшитися? Дайте строгу (термодинамічну) і статистичну відповідь.
 \item Чому рівномірний розподіл молекул відповідає рівновазі?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Одна нерівність для обох випадків} (→ [C]): з (16.75) і (16.81) $dS \ge \dfrac{d\text{'}Q}T$, а для ізольованої системи $dS \ge 0$: = для оборотних, > для необоротних процесів. Книга друкує строгу нерівність і рівність окремо.
+\item \textbf{ΔS в ізотермічному процесі} (→ [D]): з Q = RT ln(V₂/V₁) за (16.32) маємо ΔS = R ln(V₂/V₁) на моль.
+\item \textbf{Між двома станами} (→ [D]): з прикладу 16.5 $\Delta S = \nu C_V\ln\dfrac{T_2}{T_1} + \nu R\ln\dfrac{V_2}{V_1}$, де ν = m/M.
+\item \textbf{Літери для потенціалів} (→ низ сторінки): книга позначає ентальпію \textbf{I}, а потенціал Гіббса — \textbf{Z}. У сучасних текстах — \textbf{H} і \textbf{G} (вільна енергія Гіббса); F також пишуть A (енергія Гельмгольца).
+\end{itemize}
 
 \chapter*{15. Теорема Нернста}\addcontentsline{toc}{chapter}{15. Теорема Нернста}\markboth{15. Теорема Нернста}{15. Теорема Нернста}
 
@@ -2727,7 +2853,7 @@ $\lambda = \tfrac13\rho\langle v\rangle\langle l\rangle c_V$ (15.21), де $c_{V
 \item Термічні коефіцієнти розширення й тиску → 0.
 \end{enumerate}
 
-\needspace{5\baselineskip}\section*{Три закони разом (добре підходить для низу сторінки)}
+\needspace{5\baselineskip}\section*{Три закони разом (наш підсумок; добре підходить для низу сторінки)}
 {\small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.099\linewidth}>{\raggedright\arraybackslash}p{0.869\linewidth}}
 \toprule
@@ -2873,7 +2999,7 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 \needspace{5\baselineskip}\section*{[E] Порівняння з дослідом (с. 430–432), коротко}
 \begin{itemize}
 \item a і b залежать від T. \textbf{Критичний коефіцієнт} $K_\text{к} = \dfrac{RT_\text{к}}{p_\text{к}V_\text{к}} = \dfrac83 \approx 2{,}67$ теоретично, але для H₂ — 3,12, для води — 4,46. Насправді $V_{\text{к}}$ ≈ 2b.
-\item \textbf{Зведене рівняння} (англ. reduced equation) з π = p/$p_{\text{к}}$, ω = V/$V_{\text{к}}$, τ = T/$T_{\text{к}}$: $\left(\pi + \dfrac3{\omega^2}\right)(3\omega - 1) = 8\tau$ (17.18) — однакове для всіх речовин. Це \textbf{закон відповідних станів} (англ. law of corresponding states).
+\item \textbf{Зведене рівняння} (англ. reduced equation) з π = p/$p_{\text{к}}$, ω = $V_{M}$/$V_{\text{к}}$, θ = T/$T_{\text{к}}$ (17.17): $\left(\pi + \dfrac3{\omega^2}\right)(3\omega - 1) = 8\theta$ (17.18) — однакове для всіх речовин. Це \textbf{закон відповідних станів} (англ. law of corresponding states).
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{Самоперевірка}
@@ -2927,7 +3053,7 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 \needspace{5\baselineskip}\section*{[C] Просторова гратка (с. 446–447)}
 \begin{itemize}
 \item Поставивши точку в центр мас кожної структурної одиниці, отримують \textbf{просторові гратки} (англ. space lattice); їхні точки — \textbf{вузли} (англ. nodes).
-\item \textbf{Елементарна комірка} (англ. unit cell): паралелепіпед на векторах a₁, a₂, a₃; їхні довжини — \textbf{періоди ідентичності} (англ. lattice periods). Будь-який вузол: $\vec r_n = m\vec a_1 + n\vec a_2 + p\vec a_3$ (18.1).
+\item \textbf{Елементарна комірка} (англ. unit cell): паралелепіпед на векторах a₁, a₂, a₃; їхні довжини — \textbf{періоди ідентичності} (англ. lattice periods). Будь-який вузол: $\vec r_{mnp} = m\vec a_1 + n\vec a_2 + p\vec a_3$ (18.1).
 \item \textbf{Гратки Браве} (англ. Bravais lattices): комірки мінімальної площі, що зберігають повну симетрію. Їх \textbf{14} у \textbf{7 сингоніях} (англ. crystal systems).
 \end{itemize}
 
@@ -2949,14 +3075,14 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 \end{longtable}
 }
 \begin{itemize}
-\item Типи граток: \textbf{примітивна} (англ. primitive; вузли у вершинах), \textbf{базоцентрована} (англ. base-centred), \textbf{об'ємноцентрована} (англ. body-centred: Fe-α, W, Na), \textbf{гранецентрована} (англ. face-centred: Al, Cu, Ag, Au).
+\item Типи граток: \textbf{примітивна} (англ. primitive; вузли у вершинах), \textbf{базоцентрована} (англ. base-centred), \textbf{об'ємноцентрована} (англ. body-centred: Fe, W, Na), \textbf{гранецентрована} (англ. face-centred: Al, Cu, Ag, Au).
 \item \pen{} Намалюйте три кубічні гратки: просту, об'ємноцентровану й гранецентровану.
 \item Необов'язково: \textbf{індекси Міллера} (h k l) для площин, с. 449; \textbf{230 просторових груп} (Федоров, 1890); \textbf{32 класи} симетрії.
 \end{itemize}
 
 \needspace{5\baselineskip}\section*{[E] За типом зв'язку (§ 18.2, с. 450–453)}
 {\footnotesize
-\begin{longtable}{>{\raggedright\arraybackslash}p{0.138\linewidth}>{\raggedright\arraybackslash}p{0.115\linewidth}>{\raggedright\arraybackslash}p{0.261\linewidth}>{\raggedright\arraybackslash}p{0.285\linewidth}>{\raggedright\arraybackslash}p{0.121\linewidth}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.138\linewidth}>{\raggedright\arraybackslash}p{0.115\linewidth}>{\raggedright\arraybackslash}p{0.244\linewidth}>{\raggedright\arraybackslash}p{0.264\linewidth}>{\raggedright\arraybackslash}p{0.159\linewidth}}
 \toprule
 \textbf{тип кристала} & \textbf{у вузлах} & \textbf{зв'язок} & \textbf{властивості} & \textbf{приклади} \\
 \midrule
@@ -2964,7 +3090,7 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 іонний & ± іони & електростатичний & міцний, висока $T_{\text{пл}}$, поганий провідник & NaCl \\
 ковалентний (атомний) & нейтральні атоми & спільні електронні пари, \textbf{напрямлений, насичений} & дуже тверді, висока $T_{\text{пл}}$, діелектрики або напівпровідники & алмаз, Si \\
 металічний & + іони & \textbf{електронний газ} & добрі електро- й теплопровідники, блиск, ковкість & Cu, Au \\
-молекулярний & молекули & ван-дер-ваальсів, водневий & низька $T_{\text{пл}}$, ізолятори & органічні кристали, лід \\
+молекулярний & молекули & ван-дер-ваальсів, водневий & низька $T_{\text{пл}}$, ізолятори & органічні кристали; сполуки N, P, S \\
 \bottomrule
 \end{longtable}
 }
@@ -2975,6 +3101,14 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 \item Чому кристал не може мати вісь симетрії 5-го порядку? (П'ятикутниками не замостити площину.)
 \item Чому метали проводять струм, а ковалентні кристали — ні?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{Залізо у двох списках} (→ [D]): книга називає залізо і серед об'ємноцентрованих, і серед гранецентрованих металів (с. 449). Причина: α-Fe (кімнатна температура) має об'ємноцентровану гратку, а γ-Fe (вище приблизно 912 °C) — гранецентровану; саме на цьому ґрунтується гартування сталі.
+\item \textbf{Лід} (→ [E]): лід — молекулярний кристал із водневими зв'язками; книга згадує його лише серед кристалів гексагональної системи.
+\item \textbf{Літери граток} (→ [D]): у табл. 18.4 типи граток позначено P (примітивна), C (базоцентрована), J (об'ємноцентрована; в англомовних текстах I) і F (гранецентрована); ромбоедрична комірка — R.
+\end{itemize}
 
 \chapter*{29. Дефекти в кристалах}\addcontentsline{toc}{chapter}{29. Дефекти в кристалах}\markboth{29. Дефекти в кристалах}{29. Дефекти в кристалах}
 
@@ -3088,8 +3222,8 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 \needspace{5\baselineskip}\section*{[D] Властивості (с. 464–466)}
 \begin{itemize}
 \item Зберігають \textbf{об'єм} (але не форму) і мають \textbf{вільну поверхню}.
-\item \textbf{Мала стисливість} (англ. low compressibility): $\beta_T = -\dfrac1V\left(\dfrac{\partial V}{\partial p}\right)_T$ (19.2), ≈ 10⁻⁹–10⁻¹⁰ Па⁻¹ — у десятки й сотні тисяч разів менша, ніж у газів. Це прояв сильного відштовхування.
-\item \textbf{Теплове розширення} (англ. thermal expansion): $\alpha_p = \dfrac1V\left(\dfrac{\partial V}{\partial T}\right)_p$ (19.3), зазвичай > 0.
+\item \textbf{Мала стисливість} (англ. low compressibility): $\beta_T = -\dfrac1V\left(\dfrac{dV}{dp}\right)_T$ (19.2), ≈ 10⁻⁹–10⁻¹⁰ Па⁻¹ — у десятки й сотні тисяч разів менша, ніж у газів. Це прояв сильного відштовхування.
+\item \textbf{Теплове розширення} (англ. thermal expansion): $\alpha_p = \dfrac1V\left(\dfrac{dV}{dT}\right)_p$ (19.3), зазвичай > 0.
 \begin{itemize}
 \item \spark{} \textbf{Аномалія води}: від 0 до 3,98 °C вода при нагріванні \textbf{стискається}, тож її густина максимальна при 3,98 °C. Причина — ажурна тетраедрична структура з водневими зв'язками.
 \end{itemize}
@@ -3098,13 +3232,13 @@ III & S → 0 при T → 0; 0 К недосяжний \\
 
 \needspace{5\baselineskip}\section*{[E] Перенос у рідинах (с. 466–467) — порівняйте з газами (23–25)}
 {\small
-\begin{longtable}{>{\raggedright\arraybackslash}p{0.104\linewidth}>{\raggedright\arraybackslash}p{0.230\linewidth}>{\raggedright\arraybackslash}p{0.618\linewidth}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.104\linewidth}>{\raggedright\arraybackslash}p{0.228\linewidth}>{\raggedright\arraybackslash}p{0.620\linewidth}}
 \toprule
 \textbf{} & \textbf{гази} & \textbf{рідини} \\
 \midrule
 \endhead
 механізм & вільні прольоти на ⟨l⟩ & стрибки між положеннями рівноваги \\
-D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & ⟨δ²⟩/(6τ) (19.4); на 4–5 порядків менший; $D = Be^{-\Delta W/kT}$ (19.5) \\
+D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & $\tfrac16\langle\delta^2\rangle/\langle t\rangle$ (19.4); на 4–5 порядків менший; $D = Be^{-\Delta W/kT}$ (19.5) \\
 η від T & \textbf{зростає} з T & \textbf{спадає} з T: $\eta = Ae^{\Delta W/kT}$, \textbf{формула Френкеля} (19.7) \\
 λ від T & зростає & спадає приблизно лінійно \\
 \bottomrule
@@ -3125,6 +3259,13 @@ D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & ⟨δ²⟩/(6τ) (19.4); на 4–5
 \item Чому в'язкість рідини з ростом T спадає, а газу — зростає?
 \item Чому вода найгустіша при 4 °C?
 \end{enumerate}
+
+\needspace{5\baselineskip}\section*{Доповнення (не з книги)}
+Наші скорочення й виведення. У книзі таких записів немає.
+\begin{itemize}
+\item \textbf{d чи ∂} (→ [D]): книга друкує (19.2)–(19.3) з прямим d та індексом, $(dV/dp)_T$; з індексом це частинна похідна $(\partial V/\partial p)_T$, як пишуть інші тексти. Ту саму величину β\_T для газів у (14.24) позначено χ.
+\item \textbf{τ і ⟨t⟩} (→ [C], [E]): час осілого життя — τ у (19.1), але ⟨t⟩ у (19.4).
+\end{itemize}
 
 \appendix
 
@@ -3218,6 +3359,113 @@ D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & ⟨δ²⟩/(6τ) (19.4); на 4–5
 
 Спільний мікроскопічний складник — середня довжина вільного пробігу ⟨l⟩ (22).
 
+\chapter*{Позначення, знаки й одиниці}\addcontentsline{toc}{chapter}{Позначення, знаки й одиниці}\markboth{Позначення, знаки й одиниці}{Позначення, знаки й одиниці}
+
+Довідка для читання інших джерел поряд із Кучеруком: слайдів лекцій, англомовних підручників, задачників, авіаційно-космічної літератури. Та сама фізика може виглядати інакше, бо відрізняються літери, знаки чи одиниці. Стовпець книги звірено зі сканами; «інші тексти» — поширене сучасне або англомовне вживання.
+
+\needspace{5\baselineskip}\section*{Одна літера — кілька величин (у цій книзі)}
+
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.078\linewidth}>{\raggedright\arraybackslash}p{0.559\linewidth}>{\raggedright\arraybackslash}p{0.315\linewidth}}
+\toprule
+\textbf{літера} & \textbf{значення в книзі} & \textbf{де} \\
+\midrule
+\endhead
+γ & показник адіабати $C_p/C_V$; гравітаційна стала & (16.23); т. 1, с. 333 \\
+η & в'язкість; ККД; лінійна густина заряду & (15.10); (16.53); т. 2, с. 40, 62 \\
+τ & лінійна густина заряду; час осілого життя; час релаксації & (1.5); (19.1); (15.29) \\
+ν & кількість речовини (моль); кінематична в'язкість η/ρ; частота & (14.17); с. 349; (16.49) \\
+λ & теплопровідність (в оптиці — довжина хвилі) & (15.16) \\
+σ & поверхнева густина заряду; питома електропровідність; ефективний переріз & (1.4); (2.21); с. 344 \\
+ρ & об'ємна густина заряду; питомий опір; густина речовини & (1.3); (2.18); (14.64) \\
+α & кут; температурний коефіцієнт опору; коефіцієнт розширення; поляризованість & (2.19); (14.26), (19.3); (17.2) \\
+β & термічний коефіцієнт тиску; стисливість рідин $\beta_T$ & (14.29); (19.2) \\
+n, n₀ & число молекул і концентрація; у (14.70) обидві — концентрації; показник політропи & (14.14); (14.70); (16.37) \\
+W, U & потенціальна енергія: W у § 1.6, U у § 1.11, $W_\text{п}$ у § 1.25; U — також внутрішня енергія і напруга & т. 2, с. 34, 54, 101; т. 1, (16.1) \\
+k & коефіцієнт у законі Кулона; стала Больцмана; провідність & (1.6); (14.9); (2.16) \\
+C & ємність; теплоємність; стала Сезерленда & (1.68); (16.7); (15.3) \\
+ε & діелектрична проникність; холодильний коефіцієнт; енергія кванта & т. 2, с. 26; (16.68); с. 394 \\
+φ & потенціал; коефіцієнт перетворення теплового насоса; кут & (1.54); (16.66) \\
+I & сила струму; ентальпія; потенціал іонізації & (2.1); с. 408; (17.3) \\
+D & вектор електричної індукції; коефіцієнт дифузії & (1.136); (15.22) \\
+r, s & радіус; внутрішній опір; числа обертальних і коливальних ступенів вільності & (2.34); (16.45) \\
+\bottomrule
+\end{longtable}
+}
+
+\needspace{5\baselineskip}\section*{Книга vs інші тексти}
+
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.471\linewidth}>{\raggedright\arraybackslash}p{0.279\linewidth}>{\raggedright\arraybackslash}p{0.202\linewidth}}
+\toprule
+\textbf{величина} & \textbf{Кучерук} & \textbf{інші тексти} \\
+\midrule
+\endhead
+неповний диференціал & d′Q, d′A & δQ, δW, đQ \\
+скалярний добуток & $\vec p\vec E$ (без крапки) & $\vec p\cdot\vec E$ \\
+векторний добуток & $[\vec p\cdot\vec E]$, (1.25) & $\vec p\times\vec E$ \\
+ротор, дивергенція & rot, div & ∇ ×, ∇ ·; англ. curl \\
+середнє & ⟨v⟩ & $\bar v$ \\
+найбільш імовірна / середня квадратична швидкість & $v_\text{н}$ / $v_{\text{кв}}$ & $v_p$ / $v_{rms}$ \\
+число молекул / концентрація & n / n₀ & N / n \\
+молярна маса & M & M, μ (старіші тексти) \\
+ентальпія / потенціал Гіббса / вільна енергія & I / Z / F & H / G / F або A \\
+гравітаційна стала & γ & G \\
+теплопровідність & λ & k, κ \\
+тепловий потік & $j_q$ & q, $\vec q$ \\
+характеристичні температури & $T_{\text{оберт}}$, $T_{\text{кол}}$ & $θ_{rot}$, $θ_{vib}$ \\
+об'ємноцентрована гратка & J & I \\
+холодильний коефіцієнт / коефіцієнт перетворення & ε / φ & $COP_{R}$ / $COP_{HP}$ \\
+ЕРС & ℰ & ℰ, англ. emf \\
+\bottomrule
+\end{longtable}
+}
+
+\needspace{5\baselineskip}\section*{Знаки}
+
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.167\linewidth}>{\raggedright\arraybackslash}p{0.371\linewidth}>{\raggedright\arraybackslash}p{0.414\linewidth}}
+\toprule
+\textbf{що} & \textbf{Кучерук} & \textbf{інше} \\
+\midrule
+\endhead
+робота в першому законі & A — робота \textbf{системи}: $d\text{'}Q = dU + d\text{'}A$ (16.11) & хімія, IUPAC: W — робота \textbf{над} системою, ΔU = Q + W \\
+теплота & надана системі > 0 (с. 380) & так само майже скрізь \\
+Q₂ у циклі & у η = 1 − Q₂/Q₁ модуль; у (16.71) зі знаком, Q₂ < 0 & багато текстів скрізь пишуть $Q_C$ або $\lvert Q_2\rvert$ \\
+дипольний момент & від − до + (1.19) & у деяких хімічних текстах стрілка від + до − \\
+напрям струму & рух \textbf{позитивних} зарядів (т. 2, с. 106) & так само; електрони рухаються навпаки \\
+нормаль у потоці & зовнішня — додатна (с. 36) & так само \\
+ЕРС у правилі Кірхгофа & > 0, якщо обхід проходить джерело від − до + & та сама домовленість, але перевіряйте в кожному тексті \\
+\bottomrule
+\end{longtable}
+}
+
+\needspace{5\baselineskip}\section*{Одиниці}
+
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.212\linewidth}>{\raggedright\arraybackslash}p{0.488\linewidth}>{\raggedright\arraybackslash}p{0.252\linewidth}}
+\toprule
+\textbf{величина} & \textbf{значення} & \textbf{джерело} \\
+\midrule
+\endhead
+заряд, СГСЕ & 1 Кл = 3·10⁹ од. СГСЕ; у СГСЕ k = 1 & т. 2, с. 23 \\
+тиск & 1 атм = 101 325 Па ≈ 1,01 бар; 1 ат = 98 066,5 Па ≈ 0,98 бар; 1 тор = 133,322 Па; 1 бар = 10⁵ Па & т. 1, с. 304 \\
+енергія & 1 еВ = 1,6·10⁻¹⁹ Дж & т. 2, с. 51 \\
+температура & T = t + 273,15; потрійна точка води 273,16 К & т. 1, с. 410 \\
+стандартна атмосфера (МСА) & 1,013·10⁵ Па, 15 °C на рівні моря; −56,5 °C на 11 км; градієнт 6,5 К/км (у книзі надруковано 5,6) & т. 1, с. 335 \\
+авіаційні одиниці & 1 psi ≈ 6895 Па; 1 ft = 0,3048 м; 1 inHg ≈ 3386 Па; °F = 1,8·°C + 32 & стандартні значення, не з книги \\
+калорія & 1 кал = 4,1868 Дж & стандартне значення, не з книги \\
+\bottomrule
+\end{longtable}
+}
+
+\needspace{5\baselineskip}\section*{Як не заплутатися}
+\begin{itemize}
+\item Переписуючи формулу з іншого джерела, спершу перевірте три речі: що означає кожна літера, знак роботи і чи формула записана на моль, на кілограм чи для всього тіла ($C$, $c$, $C_0$ у (16.7)–(16.9)).
+\item Книга пише десяткові дроби з комою (8,31); англомовні тексти — з крапкою (8.31).
+\item У рукописних конспектах оберіть один символ для кожної величини, а якщо відступаєте від книги — напишіть угорі сторінки короткий список позначень.
+\end{itemize}
+
 \chapter*{Глосарій}\addcontentsline{toc}{chapter}{Глосарій}\markboth{Глосарій}{Глосарій}
 \needspace{5\baselineskip}\section*{1. Електростатика}
 
@@ -3230,7 +3478,7 @@ D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & ⟨δ²⟩/(6τ) (19.4); на 4–5
 \item \textbf{позитивні / негативні заряди} — два види зарядів; позитивні виникають на скляній паличці при натиранні шовком, негативні — на ебонітовій (янтарній) при натиранні хутром; однойменні відштовхуються, різнойменні притягуються · (англ.) positive / negative charges · \book{} т. 2, с. 15
 \item \textbf{електризація тертям} — перерозподіл електронів між тілами при щільному контакті; тіла набувають однакових за модулем і протилежних за знаком зарядів, сумарний заряд не змінюється · (англ.) triboelectric charging · \book{} т. 2, с. 16
 \item \textbf{елементарний заряд} — найменша порція електрики, що дорівнює за модулем заряду електрона · $|e| = 1{,}602\,189\,2(46)\cdot10^{-19}$ Кл · (англ.) elementary charge · \book{} т. 2, с. 16, 18
-\item \textbf{закон квантування електричного заряду} — усі заряди, які існують у природі у вільному стані, складаються з окремих дискретних зарядів, однакових за абсолютним значенням і таких, що дорівнюють зарядові електрона; приймається як постулат · $q = n|e|$, $n = \pm1, \pm2, \ldots$ · (англ.) charge quantization · \book{} т. 2, с. 18–19
+\item \textbf{закон квантування електричного заряду} — усі заряди, які існують у природі у вільному стані, складаються з окремих дискретних зарядів, однакових за абсолютним значенням і таких, що дорівнюють зарядові електрона; приймається як постулат · $\Delta q = n|e|$, $n = \pm1, \pm2, \ldots$ · (англ.) charge quantization · \book{} т. 2, с. 18–19
 \item \textbf{питомий заряд електрона} — відношення заряду частинки до її маси · $e/m = 1{,}7588\cdot10^{11}$ Кл/кг · (англ.) specific charge · \book{} т. 2, с. 17
 \item \textbf{маса спокою електрона} · $m = 9{,}109\,534(47)\cdot10^{-31}$ кг · (англ.) electron rest mass · \book{} т. 2, с. 18
 \item \textbf{інваріантність заряду} — незалежність числового значення заряду від стану інерціальних систем відліку (від швидкості руху носія) · (англ.) charge invariance · \book{} т. 2, с. 20
@@ -3258,7 +3506,7 @@ D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & ⟨δ²⟩/(6τ) (19.4); на 4–5
 \item \textbf{температура} — інтенсивний параметр, що характеризує стан внутрішнього руху частинок рівноважної системи; для ідеального газу $\Theta = \tfrac23\langle\varepsilon\rangle$, $\Theta = kT$ (14.9) · [К] · (англ.) temperature · \book{} т. 1, с. 307–308
 \item \textbf{стала Больцмана} — множник, що виражає співвідношення між одиницями енергії і термодинамічної температури · $k = 1{,}38\cdot10^{-23}$ Дж/К; $\tfrac{m_0\langle v_{\text{кв}}^2\rangle}{2} = \tfrac32kT$ (14.10) · (англ.) Boltzmann constant · \book{} т. 1, с. 308
 \item \textbf{термічне рівняння стану} — рівняння, яке в стані теплової рівноваги пов'язує p, V, T · $F(p,V,T)=0$ (14.12); для ідеального газу $pV = nkT$ (14.14) · (англ.) thermal equation of state · \book{} т. 1, с. 311–312
-\item \textbf{молярна (універсальна) газова стала} — $R = kN_A = 8{,}31$ Дж/(моль·К); чисельно дорівнює роботі розширення одного моля ідеального газу при ізобарному нагріванні на 1 К · (англ.) molar gas constant · \book{} т. 1, с. 312–313
+\item \textbf{молярна (універсальна) газова стала} — $R = kN_A = 8{,}31451$ Дж/(моль·К); чисельно дорівнює роботі розширення одного моля ідеального газу при ізобарному нагріванні на 1 К · (англ.) molar gas constant · \book{} т. 1, с. 312–313
 \item \textbf{рівняння Клапейрона} · $pV_M = RT$ (14.16) · (англ.) Clapeyron equation · \book{} т. 1, с. 312
 \item \textbf{рівняння Клапейрона–Менделєєва} · $pV = \tfrac mM RT$ (14.18) · (англ.) ideal gas law · \book{} т. 1, с. 312–313
 \item \textbf{закон Бойля–Маріотта} (ізотермічний процес, T = const) · $pV = \text{const}$ (14.22) · (англ.) Boyle–Mariotte law · \book{} т. 1, с. 314
@@ -3334,7 +3582,7 @@ D & ⅓⟨v⟩⟨l⟩; 0,1–0,9 см²/с & ⟨δ²⟩/(6τ) (19.4); на 4–5
 \item \textbf{вічний двигун другого роду} — неможливий (Оствальд) · (англ.) perpetual motion machine of the second kind · \book{} т. 1, с. 404
 \item \textbf{теорема Карно} — ККД оборотного циклу Карно не залежить від робочого тіла; ККД необоротного циклу завжди менший · $\eta \le \eta_0$ (16.69) · (англ.) Carnot's theorem · \book{} т. 1, с. 404
 \item \textbf{зведена теплота}; \textbf{нерівність Клаузіуса} · $Q_1/T_1 + Q_2/T_2 \le 0$ (16.71), $\oint d\text{'}Q/T \le 0$ (16.74) · (англ.) reduced heat, Clausius inequality · \book{} т. 1, с. 404–405
-\item \textbf{ентропія} — функція стану, повний диференціал якої при оборотному процесі $dS = d\text{'}Q/T$ (16.75); адитивна; закон зростання $dS \ge 0$ для ізольованої системи (16.82) · [Дж/К] · (англ.) entropy · \book{} т. 1, с. 406–408
+\item \textbf{ентропія} — функція стану, повний диференціал якої при оборотному процесі $dS = d\text{'}Q/T$ (16.75); адитивна; закон зростання: $dS > 0$ (16.82) для ізольованої системи при необоротних процесах, $dS = 0$ (16.83) у рівновазі · [Дж/К] · (англ.) entropy · \book{} т. 1, с. 406–408
 \item \textbf{термодинамічна ймовірність} — число мікростанів, які реалізують даний макростан · (16.90) · (англ.) thermodynamic probability (statistical weight) · \book{} т. 1, с. 411–412
 \item \textbf{принцип Больцмана} · $S = k\ln w$ (16.91) · (англ.) Boltzmann's entropy formula · \book{} т. 1, с. 413
 \item \textbf{третій закон термодинаміки (теорема Нернста)} — при T → 0 ентропія рівноважної системи перестає залежати від параметрів і прямує до сталої (нуля); $\lim_{T\to0}S = 0$ (16.93, Планк) · (англ.) third law, Nernst theorem · \book{} т. 1, с. 414–415

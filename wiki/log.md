@@ -81,3 +81,14 @@ Quick view: `grep "^## \[" wiki/log.md | tail -10`
 
 ## [2026-10-26] fix | 03 Напруженість — (1.12)
 - The scalar form $E = q/(4\pi\varepsilon_0 r^2)$ is not on p. 28; the book gives only the vector form. Marked the scalar form as our shorthand and added where (1.12) comes from: (1.8) ÷ q₀ via (1.11). Mirrored in wiki-uk/.
+
+## [2026-10-26] schema | Addendum section for our own additions
+- New convention: book blocks hold only what the book prints. Our shorthand goes to `## Addendum (not in the book)` / `## Доповнення (не з книги)` at the bottom of the page. Recorded in CLAUDE.md and the skill template.
+- Moved $F = p\,dE/dx$ (02) and $E = q/(4\pi\varepsilon_0 r^2)$ (03) there, in wiki/ and wiki-uk/.
+
+## [2026-10-26] lint | Formulas vs scans, all 44 topic pages; book content vs our additions
+- Re-checked every formula and claim in the book blocks against the scans (т. 1 and т. 2). Fixes, mirrored in wiki-uk/:
+  - 01: quantization is Δq = n|e| (с. 18), also in the glossary. 02: (1.9) wording; ε₀ = 8,854·10⁻¹². 04: (1.53)/(1.54) as printed (U, not W); the U/q₀ definition quoted. 05: (1.25) as printed [p·E]; W vs U; (1.66) uses α. 07: (1.38) as printed. 15: capacitor formulas as in Examples 1.2–1.3 (vacuum first, η). 17: (1.133) is $W_п = ½CΔφ²$. 18: $W_п$, (1.136) = ½ED. 20: $v_д$, ℰ = A/q. 21: $P_{дж}$. 23: (2.50) jE.
+  - Molecular 01: R = 8,31451, (14.17) pV = νRT. 07–09: polytropic C = ±∞ (T), n → ∞ (V). 12–13: ε for reverse Carnot moved to addendum. 14: (16.81)–(16.83) are strict > and = (book has no ≥), Example 16.5 as printed, I/Z for enthalpy and Gibbs; glossary entry fixed. 17,19: ISA lapse rate printed 5,6 К/км vs 6,5 (digits swapped), aerospace facts from с. 334. 22: (15.3) is d = d₀√(1 + C/T). 23–25: (15.29)–(15.30) as printed. 27: reduced temperature θ (17.17)–(17.18). 28: (18.1) r_mnp; Fe in both lattice lists. 30: (19.2)–(19.4) as printed.
+- Our own shorthand, derivations and summaries moved out of book blocks into `## Addendum (not in the book)` at the page bottom; summary tables labelled "our summary". Convention notes (notation, signs, units) added to the addenda.
+- New concept page [Позначення, знаки й одиниці](concepts/notation.md), also in the book appendix (build.py CONCEPTS).

@@ -80,6 +80,7 @@ updated: YYYY-MM-DD
 ## Layout       ← ASCII box plan of one handwritten page
 ## [A] … [F]    ← one box each: the book's exact term or definition in «», formula with eq. number, page
 ## Self-check   ← 2–4 questions
+## Addendum (not in the book)   ← optional: our shorthand/derivations, each with (→ [X])
 ```
 Style:
 - Use the textbook's terms exactly, with the eq. numbers it gives (1.31).
