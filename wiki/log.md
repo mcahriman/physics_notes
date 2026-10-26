@@ -74,3 +74,10 @@ Quick view: `grep "^## \[" wiki/log.md | tail -10`
 - `wiki-uk/`: all 44 topic pages, 4 concepts, both syllabi and the glossary translated into Ukrainian. English equivalents of key terms are kept as «(англ. …)», and the glossary uses «(англ.)». Formulas, eq. numbers, page refs and quotes are unchanged.
 - `Book/build.py uk` / `Book/make.sh uk` → `Book/physics-notes-uk.pdf` (103 pages, 0 errors, 0 missing glyphs).
 - New agent `translation-proofreader` (`.claude/agents/`) checks `wiki-uk/` against `wiki/`.
+
+## [2026-10-26] fix | 02 Диполь у неоднорідному полі — (1.26)
+- (1.26) was written as $F = p\,\partial E/\partial x$, which is not the book's form. Replaced it with the book's derivation $F = q\frac{dE}{dx}l$ (с. 35, checked against the scan), with $p\,dE/dx$ marked as our shorthand.
+- Flagged a book inconsistency: the F₁/F₂ labels in the text vs рис. 1.14. Mirrored in wiki-uk/.
+
+## [2026-10-26] fix | 03 Напруженість — (1.12)
+- The scalar form $E = q/(4\pi\varepsilon_0 r^2)$ is not on p. 28; the book gives only the vector form. Marked the scalar form as our shorthand and added where (1.12) comes from: (1.8) ÷ q₀ via (1.11). Mirrored in wiki-uk/.

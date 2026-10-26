@@ -325,7 +325,9 @@ $\vec F = \sum_i \vec F_i = \sum_i \dfrac{1}{4\pi\varepsilon_0}\dfrac{q_iq_0}{r_
 \needspace{5\baselineskip}\section*{[F] Диполь у неоднорідному полі (p. 35)}
 \begin{itemize}
 \item In a non-uniform field the two forces differ, so a net force appears as well as the torque:
-$F = p\,\dfrac{\partial E}{\partial x}$ (1.26), dipole along a field line.
+$F = F_1 - F_2 = qE - q\left(E - \dfrac{dE}{dx}l\right) = q\dfrac{dE}{dx}l$ (1.26), dipole along a field line (рис. 1.14).
+\item Since $p = ql$, this is $F = p\,\dfrac{dE}{dx}$. The book doesn't write that form; it is our shorthand.
+\item \warn{} Book inconsistency: in the text $F_1 = qE$ acts on the charge in the stronger field (+q), but рис. 1.14 labels $F_1$ at −q. The result is correct.
 \item Direction: \textbf{towards increasing field strength}; the dipole is pulled into the stronger field.
 \item \pen{} Example to write: why a charged comb attracts scraps of paper (induced dipoles).
 \item Optional: Example 1.1, two dipoles on one line, $F = -\dfrac{6p_1p_2}{4\pi\varepsilon_0\varepsilon r^4}$.
@@ -377,7 +379,9 @@ $F = p\,\dfrac{\partial E}{\partial x}$ (1.26), dipole along a field line.
 
 \needspace{5\baselineskip}\section*{[C] Поле точкового заряду (p. 28)}
 \begin{itemize}
-\item $\vec E = \dfrac{1}{4\pi\varepsilon_0}\dfrac{q}{r^3}\vec r$ (1.12), so $E = \dfrac{q}{4\pi\varepsilon_0 r^2}$
+\item $\vec E = \dfrac{1}{4\pi\varepsilon_0}\dfrac{q}{r^3}\vec r$ (1.12), where $\vec r$ is the radius vector from q to the point (book, p. 28)
+\item Where it comes from: Coulomb's law (1.8) for q and the test charge $q_0$, divided by $q_0$ as in (1.11).
+\item Magnitude: $|\vec r| = r$, so $E = \dfrac{q}{4\pi\varepsilon_0 r^2}$. The book doesn't write this form; it is our shorthand.
 \item The field is \textbf{центрально-симетричне} (centrally symmetric).
 \item The two-step view of interaction (p. 29): q₁ creates the field E₁₂, and the field acts on q₂ with $\vec F_{12} = q_2\vec E_{12}$.
 \end{itemize}
