@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Інтерактивні демо</title>
+<style>
+  :root { --bg:#1c1c1c; --fg:#e8e6df; --dim:#8a8a85; --acc:#ffd166; --pos:#58c4dd; --line:#3a3a3a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:28px 16px 48px; }
+  h1 { margin:0 0 4px; font-size:24px; color:var(--acc); }
+  .sub { color:var(--dim); margin:0 0 24px; }
+  h2 { margin:28px 0 6px; font-size:17px; color:var(--pos); border-bottom:1px solid var(--line); padding-bottom:4px; }
+  ul { list-style:none; margin:0; padding:0; }
+  li { padding:9px 0; border-bottom:1px solid var(--line); }
+  li a { color:var(--fg); font-weight:600; text-decoration:none; }
+  li a:hover { color:var(--acc); }
+  .tag { display:inline-block; margin-left:6px; padding:0 6px; border:1px solid #555; border-radius:4px; color:var(--dim); font-size:12px; font-weight:400; }
+  .d { color:var(--dim); font-size:13px; margin-top:2px; }
+  footer { margin-top:32px; color:var(--dim); font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Інтерактивні демо</h1>
+  <p class="sub">До конспектів з фізики (Кучерук, <i>Загальний курс фізики</i>). Кожна сторінка — окремий файл, її можна відкрити сама або вставити через iframe.</p>
+
+  <h2>Електростатика</h2>
+  <ul>
+    <li><a href="electrostatics/field-of-charges.html">Поле точкових зарядів</a><span class="tag">2D</span>
+      <div class="d">Тема 3–4. Лінії напруженості, еквіпотенціалі, перетягування зарядів.</div></li>
+    <li><a href="electrostatics/dipole.html">Електричний диполь</a><span class="tag">2D</span>
+      <div class="d">Тема 5, т. 2 § 1.6, 1.11. Поле, потенціал, момент сил і енергія в однорідному й неоднорідному полі.</div></li>
+    <li><a href="electrostatics/gauss.html">Теорема Гаусса</a><span class="tag">2D-переріз</span>
+      <div class="d">Тема 6, т. 2 § 1.7. Потік, тілесний кут, заряд усередині й зовні, показник 1/rˢ.</div></li>
+    <li><a href="electrostatics/gauss-3d.html">Теорема Гаусса</a><span class="tag">3D</span>
+      <div class="d">Те саме у справжніх трьох вимірах: потік чисельно по сітці поверхні, зарядами можна рухати.</div></li>
+  </ul>
+
+  <h2>Молекулярна фізика й термодинаміка</h2>
+  <ul>
+    <li><a href="molecular/ideal-gas-laws.html">Закони ідеальних газів</a><span class="tag">2D</span>
+      <div class="d">Тема 1, т. 1 § 14.6–14.7. Ізотерма, ізобара, ізохора, закон Авогадро.</div></li>
+    <li><a href="molecular/ideal-gas-laws-3d.html">Закони ідеальних газів</a><span class="tag">3D</span>
+      <div class="d">Те саме з молекулами в об'ємі: сліди, гізмо обертання.</div></li>
+    <li><a href="molecular/mkt-basic-equation-3d.html">Основне рівняння МКТ</a><span class="tag">3D</span>
+      <div class="d">Тема 2, т. 1 § 14.2–14.4. Одна молекула в кубі, p = ⅔n₀⟨ε⟩, температура, релаксація.</div></li>
+    <li><a href="molecular/cycles-3d.html">Колові процеси</a><span class="tag">3D</span>
+      <div class="d">Тема 11, т. 1 § 16.6. Оборотні й необоротні процеси, Q = A за цикл, робота = площа, прямий і обернений цикл.</div></li>
+    <li><a href="molecular/second-law-3d.html">Другий закон термодинаміки</a><span class="tag">3D</span>
+      <div class="d">Тема 16, т. 1 § 16.8. Клаузіус, Томсон, теорема Карно, нерівність Клаузіуса, перехід до ентропії.</div></li>
+  </ul>
+
+  <footer>Усі посилання відносні: теку <code>demos/</code> можна покласти на будь-який хостинг.</footer>
+</main>
+</body>
+</html>
