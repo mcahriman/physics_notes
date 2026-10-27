@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Теорема Гаусса</title>
+<style>
+  :root { --bg:#1c1c1c; --fg:#e8e6df; --pos:#58c4dd; --neg:#fc6255; --acc:#ffd166; --dim:#8a8a85; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+    font:14px/1.45 system-ui,sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0; touch-action:none; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  .panel { background:rgba(28,28,28,.9); border:1px solid #444; border-radius:10px; backdrop-filter:blur(4px); }
+  #card { position:absolute; left:12px; bottom:58px; width:min(440px,calc(100% - 24px)); padding:12px 16px; max-height:52%; overflow:auto; }
+  #card h2 { margin:0 0 4px; font-size:18px; color:var(--acc); }
+  #card p { margin:4px 0; }
+  #card .ref { color:var(--dim); font-size:12px; }
+  #controls { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin-top:8px; }
+  #controls label { display:flex; gap:6px; align-items:center; color:var(--dim); }
+  #controls input[type=range] { width:110px; accent-color:var(--pos); }
+  #live { margin-top:6px; font:13px ui-monospace,monospace; color:var(--acc); white-space:pre-line; }
+  button { background:#2a2a2a; color:var(--fg); border:1px solid #444; border-radius:6px; padding:4px 12px; font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--pos); }
+  #formulas { position:absolute; top:10px; right:10px; width:min(300px,calc(100% - 24px)); padding:8px 12px; }
+  #formulas summary { cursor:pointer; font-weight:600; }
+  #formulas .f { font:15px/1.8 "STIX Two Math","Cambria Math",Georgia,serif; }
+  #formulas .f i { color:var(--pos); }
+  #formulas .n { color:var(--dim); font-size:12px; margin-top:4px; }
+  #nav { position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:10px; align-items:center; padding:6px 12px; }
+  #dots { display:flex; gap:7px; }
+  #dots span { width:10px; height:10px; border-radius:50%; background:#555; cursor:pointer; }
+  #dots span.on { background:var(--acc); }
+  #count { color:var(--dim); min-width:36px; text-align:center; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="ov"></canvas></div>
+<details id="formulas" class="panel" open>
+  <summary>Формули</summary>
+  <div class="f" id="fbody"></div>
+  <div class="n" id="fnote"></div>
+</details>
+<div id="card" class="panel">
+  <h2 id="ctitle"></h2><div id="ctext"></div><div id="controls"></div><div id="live"></div>
+</div>
+<div id="nav" class="panel"><button id="prev">←</button><div id="dots"></div><span id="count"></span><button id="next">→</button></div>
+
+<script>
+"use strict";
+/* Units: ε₀ = 1, so a point charge gives E = q/(4π r²) and the flux of a charge q is q.
+   Steps 3–6 use SURFACES OF REVOLUTION about the x axis with charges on the axis:
+   the drawing is a meridian section, the flux is integrated in 3D (dS = 2πρ ds). */
+const ov=document.getElementById("ov"), ctx=ov.getContext("2d"), stage=document.getElementById("stage");
+let W=0,H=0,SCALE=7;
+const toWorld=(px,py)=>({x:(px/W-.5)*(W/H)*SCALE, y:(.5-py/H)*SCALE});
+const P=(x,y)=>({x:(x/((W/H)*SCALE)+.5)*W, y:(.5-y/SCALE)*H});
+function resize(){ const d=Math.min(devicePixelRatio||1,2); W=stage.clientWidth; H=stage.clientHeight;
+  SCALE=Math.max(7,13*H/W); ov.width=W*d; ov.height=H*d; ctx.setTransform(d,0,0,d,0,0); S.dirty=true; }
+addEventListener("resize",resize);
+
+const S={step:0, alpha:.6, dS:2, beta:.35, r:2.2, a:2.2, b:1.7, n:2, s:2, charges:[], dirty:true};
+const fmt=(v,n=2)=>v.toFixed(n);
+const norm=a=>Math.atan2(Math.sin(a),Math.cos(a));
+
+/* ---------- field of axis charges, E ∝ q/r^s ---------- */
+function field(x,y){
+  let ex=0,ey=0;
+  for (const c of S.charges){ const dx=x-c.x, r=Math.sqrt(dx*dx+y*y+1e-4), k=c.q/(4*Math.PI*Math.pow(r,S.s+1)); ex+=k*dx; ey+=k*y; }
+  return [ex,ey];
+}
+function surfPt(t){ const c=Math.cos(t), s=Math.sin(t), e=2/S.n; return [S.a*Math.sign(c)*Math.abs(c)**e, S.b*Math.abs(s)**e]; }
+function flux(){
+  const N=500, seg=[]; let tot=0, prev=surfPt(0);
+  for (let i=1;i<=N;i++){
+    const cur=surfPt(Math.PI*i/N), dx=cur[0]-prev[0], dr=cur[1]-prev[1], len=Math.hypot(dx,dr)||1e-9;
+    const mx=(cur[0]+prev[0])/2, my=(cur[1]+prev[1])/2, nx=dr/len, ny=-dx/len, [ex,ey]=field(mx,my);
+    const En=ex*nx+ey*ny, dPhi=En*2*Math.PI*my*len; tot+=dPhi; seg.push({a:prev,b:cur,En,dPhi}); prev=cur;
+  }
+  return {tot,seg};
+}
+const inside = c => Math.abs(c.x)<S.a;
+function trace(x,y,dir){
+  const pts=[[x,y]], h=.06;
+  for (let i=0;i<700;i++){
+    let [ax,ay]=field(x,y), m=Math.hypot(ax,ay)||1; ax*=dir/m; ay*=dir/m;
+    let [bx,by]=field(x+ax*h/2,y+ay*h/2); m=Math.hypot(bx,by)||1; bx*=dir/m; by*=dir/m;
+    x+=bx*h; y+=by*h; pts.push([x,y]);
+    if (Math.abs(x)>SCALE*W/H||Math.abs(y)>SCALE) break;
+    if (S.charges.some(c=>c.q*dir<0 && Math.hypot(x-c.x,y)<.12)) break;
+  }
+  return pts;
+}
+
+/* ---------- drawing helpers ---------- */
+function arrow(x0,y0,x1,y1,col,w=2.5,head=10){
+  const a=P(x0,y0), b=P(x1,y1), L=Math.hypot(b.x-a.x,b.y-a.y); if (L<3) return;
+  const th=Math.atan2(b.y-a.y,b.x-a.x), hh=Math.min(head,L*.6);
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x-Math.cos(th)*hh*.6,b.y-Math.sin(th)*hh*.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(b.x-hh*Math.cos(th-.4),b.y-hh*Math.sin(th-.4));
+  ctx.lineTo(b.x-hh*Math.cos(th+.4),b.y-hh*Math.sin(th+.4)); ctx.closePath(); ctx.fill();
+}
+function text(t,x,y,col="#e8e6df",font="15px system-ui",align="center"){
+  const p=P(x,y); ctx.font=font; ctx.fillStyle=col; ctx.textAlign=align; ctx.textBaseline="middle"; ctx.fillText(t,p.x,p.y);
+}
+function polyline(pts,col,w){ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath();
+  pts.forEach(([x,y],i)=>{ const p=P(x,y); i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); }); ctx.stroke(); }
+function drawCharges(){
+  ctx.font="bold 15px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  for (const c of S.charges){ const p=P(c.x,0), r=9+5*Math.abs(c.q);
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,7); ctx.fillStyle=c.q>0?"#58c4dd":"#fc6255"; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle="#1c1c1c"; ctx.stroke();
+    ctx.fillStyle="#1c1c1c"; ctx.fillText((c.q>0?"+":"−")+(Math.abs(c.q)===1?"":Math.abs(c.q)),p.x,p.y+1); }
+}
+function inset(o){
+  const w=Math.min(220,W-24), h=125, x=12, y=12;
+  ctx.save(); ctx.translate(x,y); ctx.fillStyle="rgba(28,28,28,.88)"; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle="#444"; ctx.lineWidth=1; ctx.strokeRect(.5,.5,w,h);
+  const X=v=>10+(v-o.x0)/(o.x1-o.x0)*(w-20), Y=v=>h-22-(v-o.y0)/(o.y1-o.y0)*(h-42);
+  ctx.beginPath(); ctx.rect(1,1,w-2,h-2); ctx.clip();
+  ctx.strokeStyle="#555"; ctx.beginPath(); ctx.moveTo(0,Y(0)); ctx.lineTo(w,Y(0)); ctx.stroke();
+  ctx.strokeStyle=o.col; ctx.lineWidth=2; ctx.beginPath();
+  for (let i=0;i<=80;i++){ const v=o.x0+(o.x1-o.x0)*i/80; i?ctx.lineTo(X(v),Y(o.f(v))):ctx.moveTo(X(v),Y(o.f(v))); } ctx.stroke();
+  ctx.fillStyle=o.col; ctx.beginPath(); ctx.arc(X(o.mx),Y(o.f(o.mx)),4,0,7); ctx.fill();
+  ctx.fillStyle="#8a8a85"; ctx.font="12px system-ui"; ctx.textBaseline="alphabetic"; ctx.fillText(o.title,10,14);
+  ctx.restore();
+}
+
+/* ---------- surface + field lines (steps 3–6) ---------- */
+function drawField(){
+  const pos=S.charges.filter(c=>c.q>0), srcs=pos.length?pos:S.charges, dir=pos.length?1:-1;
+  ctx.lineWidth=1.2; ctx.strokeStyle="rgba(232,230,223,.45)";
+  for (const c of srcs){ const n=Math.round(12*Math.abs(c.q));
+    for (let k=0;k<n;k++){ const t=2*Math.PI*(k+.5)/n; polyline(trace(c.x+.14*Math.cos(t),.14*Math.sin(t),dir),"rgba(232,230,223,.45)",1.2); } }
+}
+function drawSurface(fl){
+  ctx.fillStyle="rgba(255,209,102,.06)"; ctx.beginPath();
+  fl.seg.forEach((s,i)=>{ const p=P(s.a[0],s.a[1]); i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); });
+  fl.seg.slice().reverse().forEach(s=>{ const p=P(s.b[0],-s.b[1]); ctx.lineTo(p.x,p.y); }); ctx.fill();
+  for (const s of fl.seg){
+    const t=Math.tanh(Math.abs(s.En)*40), col=s.En>0?`rgba(88,196,221,${.25+.75*t})`:`rgba(252,98,85,${.25+.75*t})`;
+    for (const sg of [1,-1]){ const a=P(s.a[0],sg*s.a[1]), b=P(s.b[0],sg*s.b[1]);
+      ctx.strokeStyle=col; ctx.lineWidth=2+7*t; ctx.lineCap="butt"; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+  }
+}
+function engineDraw(extra){
+  drawField(); const fl=flux(); drawSurface(fl); drawCharges();
+  const qin=S.charges.filter(inside).reduce((s,c)=>s+c.q,0);
+  text("S",S.a*.72,S.b*.72+.2,"#ffd166","italic 17px Georgia,serif");
+  return `Φ = ∮ Eₙ dS = ${fmt(Math.abs(fl.tot)<5e-4?0:fl.tot,3)}\nΣqᵢ(всередині)/ε₀ = ${fmt(qin,3)}`+(extra||"");
+}
+
+/* ---------- steps ---------- */
+const cSl=(label,k,min,max,step,fmtf=v=>fmt(v))=>({label,min,max,step,get:()=>S[k],set:v=>S[k]=v,fmt:fmtf});
+const surfCtl=[cSl("a","a",.8,4,.05),cSl("b","b",.6,3,.05),cSl("форма","n",2,8,.1,v=>"n="+fmt(v,1))];
+const steps=[
+ {title:"1. Потік вектора E",
+  html:`<p>Нехай однорідне поле E проходить крізь плоску площадку ΔS, нормаль <b>n</b> якої утворює кут α з E. <b>Потік</b> — скільки ліній поля «пронизує» площадку: ΔΦ = E·ΔS·cos α = Eₙ·ΔS.</p>
+  <p><b>Тягни</b> мишею, щоб повернути площадку. Жовті лінії — ті, що її перетинають. Знак потоку задає cos α; за додатну нормаль беруть зовнішню.</p>
+  <p class="ref">т. 2, § 1.7, с. 36, (1.27)</p>`,
+  f:`<div>ΔΦ<sub>E</sub> = <i>E</i> Δ<i>S</i> cos α = <i>E<sub>n</sub></i> Δ<i>S</i> &nbsp;(1.27)</div><div>Φ<sub>E</sub> = ∫<sub><i>S</i></sub> <i>E<sub>n</sub></i> d<i>S</i></div>`,
+  n:`Кількість ліній ∝ E·ΔS·cos α.`,
+  init(){ S.alpha=.6; },
+  controls:[cSl("ΔS","dS",.6,4,.05)],
+  draw(){
+    const E=1, eff=S.dS*Math.abs(Math.cos(S.alpha)); let cnt=0;
+    for (let y=-3.2;y<=3.2;y+=.4){ const hit=Math.abs(y)<eff/2; if (hit) cnt++;
+      arrow(-5.2,y,5.2,y,hit?"#ffd166":"rgba(232,230,223,.28)",hit?2.2:1.2,8); }
+    const t=[-Math.sin(S.alpha),Math.cos(S.alpha)], h=S.dS/2;
+    ctx.strokeStyle="#58c4dd"; ctx.lineWidth=6; ctx.lineCap="round"; ctx.beginPath();
+    let p=P(-t[0]*h,-t[1]*h); ctx.moveTo(p.x,p.y); p=P(t[0]*h,t[1]*h); ctx.lineTo(p.x,p.y); ctx.stroke();
+    arrow(0,0,Math.cos(S.alpha)*1.6,Math.sin(S.alpha)*1.6,"#e8e6df",2.5);
+    text("n",Math.cos(S.alpha)*1.95,Math.sin(S.alpha)*1.95,"#e8e6df","italic 17px Georgia,serif");
+    text("E",4.7,.35,"#e8e6df","italic 18px Georgia,serif");
+    inset({title:"ΔΦ / (E·ΔS) = cos α",x0:-Math.PI,x1:Math.PI,y0:-1.3,y1:1.3,mx:norm(S.alpha),col:"#ffd166",f:Math.cos});
+    return `α = ${fmt(norm(S.alpha)*180/Math.PI,0)}°\nΔΦ = E ΔS cosα = ${fmt(E*S.dS*Math.cos(S.alpha),2)}\nлінії крізь площадку: ${cnt}`;
+  }},
+ {title:"2. Тілесний кут і закон 1/r²",
+  html:`<p>Для точкового заряду потік крізь малу ділянку сфери: dΦ = E·dS = q·dω/(4πε₀), де <b>dω</b> — <b>тілесний кут</b>, під яким ділянку видно із заряду.</p>
+  <p>Збільшуй r: площа ділянки росте як r², а поле падає як 1/r². Добуток <b>не змінюється</b> — крізь обидві дуги проходять ті самі лінії. Саме тому важить закон <b>1/r²</b>.</p>
+  <p class="ref">т. 2, § 1.7, с. 36–37, (1.29)</p>`,
+  f:`<div>d<i>Φ<sub>E</sub></i> = <i>q</i> d<i>ω</i> / (4π ε₀) &nbsp;(1.29)</div><div><i>E</i> d<i>S</i> = <i>q</i>/(4π ε₀ <i>r</i>²)·<i>ω r</i>²</div>`,
+  n:`Тут ε₀ = 1, ω — тілесний кут конуса.`,
+  init(){ S.beta=.35; S.r=2.2; },
+  controls:[cSl("r","r",1,4.5,.05),{label:"кут β",min:.1,max:.7,step:.01,get:()=>S.beta,set:v=>S.beta=v,fmt:v=>fmt(v*180/Math.PI,0)+"°"}],
+  draw(){
+    const x0=-5.2, b=S.beta, om=2*Math.PI*(1-Math.cos(b)), q=1;
+    for (let i=-4;i<=4;i++){ const a=b*i/4; arrow(x0,0,x0+8.6*Math.cos(a),8.6*Math.sin(a),Math.abs(i)<4?"rgba(255,209,102,.5)":"#ffd166",Math.abs(i)<4?1.2:2,7); }
+    for (const [R,ls,col] of [[S.r,[],"#58c4dd"],[S.r*1.7,[5,5],"#8a8a85"]]){
+      ctx.setLineDash(ls); ctx.strokeStyle=col; ctx.lineWidth=ls.length?1.5:5; ctx.beginPath();
+      const c=P(x0,0), pr=P(x0+R,0).x-c.x; ctx.arc(c.x,c.y,pr,-b,b); ctx.stroke(); ctx.setLineDash([]); }
+    const c=P(x0,0); ctx.beginPath(); ctx.arc(c.x,c.y,13,0,7); ctx.fillStyle="#58c4dd"; ctx.fill();
+    ctx.fillStyle="#1c1c1c"; ctx.font="bold 16px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("+",c.x,c.y+1);
+    text("dω",x0+1.5,0,"#ffd166","italic 16px Georgia,serif");
+    const dS=om*S.r*S.r, E=q/(4*Math.PI*S.r*S.r);
+    return `ω = 2π(1−cosβ) = ${fmt(om,3)} ср\nr=${fmt(S.r)}:  E = ${fmt(E,4)},  ΔS = ${fmt(dS,2)}\nΔΦ = E·ΔS = ${fmt(E*dS,4)}   q·ω/4π = ${fmt(q*om/(4*Math.PI),4)}`;
+  }},
+ {title:"3. Заряд усередині: потік = q/ε₀",
+  html:`<p>Охопимо заряд довільною замкненою поверхнею S. Кожен тілесний кут дає свій dΦ, а ∮dω = 4π, тому <b>Φ = q/ε₀ — незалежно від форми й розміру</b> поверхні.</p>
+  <p>Міняй a, b і форму; <b>тягни</b> заряд уздовж осі. Колір поверхні — Eₙ: синій — виходить, червоний — входить. Φ не змінюється.</p>
+  <p class="ref">т. 2, § 1.7, с. 37, (1.30)</p>`,
+  f:`<div>∮ d<i>ω</i> = 4π</div><div><i>Φ<sub>E</sub></i> = <i>q</i> / ε₀ &nbsp;(1.30)</div>`,
+  n:`Поверхня — тіло обертання навколо осі x; потік рахується в 3D (dS = 2πρ ds).`,
+  init(){ S.charges=[{x:-.4,q:1}]; S.a=2.2;S.b=1.7;S.n=2;S.s=2; }, controls:surfCtl, draw(){ return engineDraw(); }},
+ {title:"4. Заряд зовні: потік = 0",
+  html:`<p>Якщо заряд <b>поза</b> поверхнею, кожен конус перетинає її двічі: один раз входить (внесок −), другий — виходить (+), і ці внески скорочуються: Φ = 0.</p>
+  <p><b>Втягни</b> заряд усередину: потік стрибком стає q/ε₀. Червона ділянка — «вхід», синя — «вихід».</p>
+  <p class="ref">т. 2, § 1.7, с. 37–38, (1.32)</p>`,
+  f:`<div><i>Φ<sub>E</sub></i> = 0 &nbsp;(1.32)</div><div>(заряд поза поверхнею)</div>`,
+  n:`Лінії поля входять і виходять у однакових кількостях.`,
+  init(){ S.charges=[{x:4.4,q:1}]; S.a=2.2;S.b=1.7;S.n=2;S.s=2; }, controls:surfCtl, draw(){ return engineDraw(); }},
+ {title:"5. Кілька зарядів: алгебрична сума",
+  html:`<p><b>Теорема Гаусса</b>: потік вектора E крізь довільну замкнену поверхню зсередини назовні дорівнює алгебричній сумі зарядів усередині, поділеній на ε₀. Заряди зовні не дають внеску.</p>
+  <p>Тягни заряди: +1, −1 і +2. Додатні заряди — <b>джерела</b>, від'ємні — <b>стоки</b>.</p>
+  <p class="ref">т. 2, § 1.7, с. 38, (1.31)</p>`,
+  f:`<div><i>Φ<sub>E</sub></i> = ∮<sub><i>S</i></sub> <i>E<sub>n</sub></i> d<i>S</i> = (1/ε₀) Σ <i>q<sub>i</sub></i> &nbsp;(1.31)</div>`,
+  n:`Для неперервного розподілу — (1.33).`,
+  init(){ S.charges=[{x:-1.2,q:1},{x:.3,q:-1},{x:4.4,q:2}]; S.a=2.2;S.b=1.7;S.n=2;S.s=2; }, controls:surfCtl, draw(){ return engineDraw(); }},
+ {title:"6. Чому саме 1/r²",
+  html:`<p>Теорема Гаусса — це <b>інтегральна форма закону Кулона</b>. Вона працює тому, що E ∝ 1/r². Змінь показник s у законі E ∝ 1/rˢ і зміни розмір поверхні.</p>
+  <p>При s = 2 потік не залежить від радіуса. Інакше він <b>залежить від розмірів поверхні</b>, і теорема «ламається».</p>
+  <p class="ref">т. 2, § 1.7, с. 38</p>`,
+  f:`<div><i>E</i> ∝ 1/<i>r<sup>s</sup></i>, &nbsp;<i>Φ</i> ∝ <i>R</i><sup>2−<i>s</i></sup></div>`,
+  n:`Лише при s = 2 потік крізь сферу сталий.`,
+  init(){ S.charges=[{x:0,q:1}]; S.a=1.8;S.b=1.8;S.n=2;S.s=2; },
+  controls:[cSl("показник s","s",1.5,3,.05),cSl("a","a",.8,4,.05),cSl("b","b",.6,3,.05)], draw(){ return engineDraw(); }},
+];
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id), dots=$("dots");
+steps.forEach((_,i)=>{ const d=document.createElement("span"); d.onclick=()=>go(i); dots.appendChild(d); });
+function go(i){
+  S.step=Math.max(0,Math.min(steps.length-1,i)); const st=steps[S.step]; st.init();
+  $("ctitle").textContent=st.title; $("ctext").innerHTML=st.html; $("fbody").innerHTML=st.f; $("fnote").textContent=st.n;
+  const c=$("controls"); c.innerHTML="";
+  (st.controls||[]).forEach(s=>{
+    const l=document.createElement("label"), v=document.createElement("span"), inp=document.createElement("input");
+    inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=s.get();
+    const upd=()=>{ v.textContent=s.fmt(s.get()); };
+    inp.oninput=()=>{ s.set(+inp.value); upd(); S.dirty=true; }; l.append(s.label+" ",inp,v); upd(); c.appendChild(l);
+  });
+  [...dots.children].forEach((d,k)=>d.classList.toggle("on",k===S.step));
+  $("count").textContent=(S.step+1)+" / "+steps.length; history.replaceState(null,"","#"+(S.step+1)); S.dirty=true;
+}
+$("prev").onclick=()=>go(S.step-1); $("next").onclick=()=>go(S.step+1);
+addEventListener("keydown",e=>{ if (e.key==="ArrowRight"||e.key===" ") go(S.step+1); if (e.key==="ArrowLeft") go(S.step-1); });
+if (innerWidth<720) $("formulas").open=false;
+
+/* ---------- interaction ---------- */
+let drag=null;
+const wpos=e=>{ const r=stage.getBoundingClientRect(); return toWorld(e.clientX-r.left,e.clientY-r.top); };
+stage.addEventListener("pointerdown",e=>{
+  const w=wpos(e); stage.setPointerCapture(e.pointerId);
+  if (S.step===0){ drag="angle"; S.alpha=Math.atan2(w.y,w.x); }
+  else if (S.step>=2){ let best=-1,bd=1.2; S.charges.forEach((c,i)=>{ const d=Math.hypot(c.x-w.x,w.y); if (d<bd){bd=d;best=i;} }); if (best>=0) drag=best; }
+  S.dirty=true;
+});
+stage.addEventListener("pointermove",e=>{
+  if (drag===null) return; const w=wpos(e);
+  if (drag==="angle") S.alpha=Math.atan2(w.y,w.x);
+  else S.charges[drag].x=Math.max(-SCALE*W/H/2+.5,Math.min(SCALE*W/H/2-.5,w.x));
+  S.dirty=true;
+});
+stage.addEventListener("pointerup",()=>{ drag=null; });
+
+(function loop(){
+  if (S.dirty){ S.dirty=false; ctx.clearRect(0,0,W,H); const t=steps[S.step].draw(); $("live").textContent=t||""; }
+  requestAnimationFrame(loop);
+})();
+resize(); go((parseInt(location.hash.slice(1))||1)-1);
+</script>
+</body>
+</html>

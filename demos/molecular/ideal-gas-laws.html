@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Закони ідеальних газів</title>
+<style>
+  :root { --bg:#1c1c1c; --fg:#e8e6df; --pos:#58c4dd; --neg:#fc6255; --acc:#ffd166; --dim:#8a8a85; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui,sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  .panel { background:rgba(28,28,28,.9); border:1px solid #444; border-radius:10px; backdrop-filter:blur(4px); }
+  #card { position:absolute; left:12px; bottom:58px; width:min(450px,calc(100% - 24px)); padding:12px 16px; max-height:50%; overflow:auto; }
+  #card h2 { margin:0 0 4px; font-size:18px; color:var(--acc); }
+  #card p { margin:4px 0; }
+  #card .ref { color:var(--dim); font-size:12px; }
+  #card .add { color:var(--dim); font-size:12px; font-style:italic; }
+  #controls { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin-top:8px; }
+  #controls label { display:flex; gap:6px; align-items:center; color:var(--dim); }
+  #controls input[type=range] { width:110px; accent-color:var(--pos); }
+  #live { margin-top:6px; font:13px ui-monospace,monospace; color:var(--acc); white-space:pre-line; }
+  button { background:#2a2a2a; color:var(--fg); border:1px solid #444; border-radius:6px; padding:4px 12px; font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--pos); }
+  #formulas { position:absolute; top:10px; right:10px; width:min(300px,calc(100% - 24px)); padding:8px 12px; }
+  #formulas summary { cursor:pointer; font-weight:600; }
+  #formulas .f { font:15px/1.8 "STIX Two Math","Cambria Math",Georgia,serif; }
+  #formulas .f i { color:var(--pos); }
+  #formulas .n { color:var(--dim); font-size:12px; margin-top:4px; }
+  #nav { position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:10px; align-items:center; padding:6px 12px; }
+  #dots { display:flex; gap:7px; }
+  #dots span { width:10px; height:10px; border-radius:50%; background:#555; cursor:pointer; }
+  #dots span.on { background:var(--acc); }
+  #count { color:var(--dim); min-width:36px; text-align:center; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<details id="formulas" class="panel" open>
+  <summary>Формули</summary><div class="f" id="fbody"></div><div class="n" id="fnote"></div>
+</details>
+<div id="card" class="panel"><h2 id="ctitle"></h2><div id="ctext"></div><div id="controls"></div><div id="live"></div></div>
+<div id="nav" class="panel"><button id="prev">←</button><div id="dots"></div><span id="count"></span><button id="next">→</button></div>
+
+<script>
+"use strict";
+/* 2D model of a gas in a box with a piston, k = 1, units arbitrary.
+   Molecules fly freely and bounce elastically; pressure = momentum given to the walls per unit time and length.
+   In 2D, p·A = N·k·T plays the role of pV = nkT (14.14). An Andersen thermostat keeps T equal to the slider. */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d"), stage=document.getElementById("stage");
+let CW=0,CH=0;
+function resize(){ const d=Math.min(devicePixelRatio||1,2); CW=stage.clientWidth; CH=stage.clientHeight;
+  cv.width=CW*d; cv.height=CH*d; ctx.setTransform(d,0,0,d,0,0); }
+addEventListener("resize",resize);
+
+const NN=100, BH=5, TSCALE=3, PISTON_RATE=3;       // box height, sim-time speed-up, max piston speed
+class Sim {
+  constructor(m){ this.m=m; this.N=0; this.T=2; this.W=6; this.Wt=6; this.x=[];this.y=[];this.vx=[];this.vy=[]; this.acc=0; this.p=0; this.setN(50); }
+  gauss(){ return Math.sqrt(-2*Math.log(Math.random()+1e-12))*Math.cos(2*Math.PI*Math.random()); }
+  setN(n){ n=Math.round(n); const s=Math.sqrt(this.T/this.m);
+    while (this.x.length<n){ this.x.push(Math.random()*this.W); this.y.push(Math.random()*BH); this.vx.push(this.gauss()*s); this.vy.push(this.gauss()*s); }
+    while (this.x.length>n){ this.x.pop();this.y.pop();this.vx.pop();this.vy.pop(); } this.N=n; }
+  step(dt){
+    const prevW=this.W, dw=this.Wt-this.W, mv=PISTON_RATE*dt; this.W+=Math.max(-mv,Math.min(mv,dw)); const u=(this.W-prevW)/dt;
+    let imp=0; const n=this.N, m=this.m;
+    for (let i=0;i<n;i++){
+      let x=this.x[i]+this.vx[i]*dt, y=this.y[i]+this.vy[i]*dt, vx=this.vx[i], vy=this.vy[i];
+      if (x<0){ x=-x; imp+=2*m*(-vx); vx=-vx; }
+      if (x>this.W){ const rel=vx-u; if (rel>0){ imp+=2*m*rel; vx=2*u-vx; x=2*this.W-x; } x=Math.max(0,Math.min(x,this.W-1e-3)); }
+      if (y<0){ y=-y; imp+=2*m*(-vy); vy=-vy; } if (y>BH){ y=2*BH-y; imp+=2*m*vy; vy=-vy; }
+      this.x[i]=x; this.y[i]=y; this.vx[i]=vx; this.vy[i]=vy;
+    }
+    // Andersen thermostat: now and then a molecule gets a fresh Maxwell velocity at T (keeps the gas isotropic and T = slider)
+    const sg=Math.sqrt(this.T/m), pr=1.5*dt;
+    for (let i=0;i<n;i++) if (Math.random()<pr){ this.vx[i]=this.gauss()*sg; this.vy[i]=this.gauss()*sg; }
+    const tau=6; this.acc=this.acc*Math.exp(-dt/tau)+imp; this.p=this.acc/(tau*(2*this.W+2*BH));
+  }
+  get A(){ return this.W*BH; }
+}
+const A=new Sim(1), B=new Sim(4);
+
+/* ---------- state ---------- */
+const S={step:0, N:50, T:2, Wt:6, p0:2.5, NB:50, WtB:4, pts:[], msg:""};
+const fmt=(v,n=2)=>v.toFixed(n);
+
+/* ---------- drawing ---------- */
+function drawSim(sim,ox,oy,u,maxW,hueBase,label){
+  const bw=sim.W*u, bh=BH*u;
+  ctx.fillStyle="rgba(255,255,255,.03)"; ctx.fillRect(ox,oy,bw,bh);
+  ctx.strokeStyle="#8a8a85"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(ox+bw,oy); ctx.lineTo(ox,oy); ctx.lineTo(ox,oy+bh); ctx.lineTo(ox+bw,oy+bh); ctx.stroke();
+  ctx.strokeStyle="#555"; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(ox+bw+12,oy+bh/2); ctx.lineTo(ox+maxW*u+16,oy+bh/2); ctx.stroke();
+  ctx.fillStyle="#cfcfc8"; ctx.fillRect(ox+bw,oy-3,12,bh+6);
+  const fl=Math.min(90,sim.p*5); if (fl>3){ ctx.strokeStyle=ctx.fillStyle="#fc6255"; ctx.lineWidth=3;
+    const y=oy+bh/2, x0=ox+bw+14; ctx.beginPath(); ctx.moveTo(x0,y-18); ctx.lineTo(x0+fl,y-18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0+fl+8,y-18); ctx.lineTo(x0+fl-2,y-23); ctx.lineTo(x0+fl-2,y-13); ctx.fill();
+    ctx.font="italic 14px Georgia,serif"; ctx.textAlign="left"; ctx.fillText("p",x0+2,y-28); }
+  const r=sim.m>1?5:3, s0=Math.sqrt(sim.T/sim.m);
+  for (let i=0;i<sim.N;i++){ const sp=Math.hypot(sim.vx[i],sim.vy[i])/(2.2*s0), h=hueBase-Math.min(1,sp)*hueBase*.8;
+    ctx.fillStyle=`hsl(${h},85%,62%)`; ctx.beginPath(); ctx.arc(ox+sim.x[i]*u,oy+sim.y[i]*u,r,0,7); ctx.fill(); }
+  if (label){ ctx.fillStyle="#e8e6df"; ctx.font="14px system-ui"; ctx.textAlign="left"; ctx.fillText(label,ox,oy-10); }
+}
+function plot(o){
+  const w=Math.min(250,CW-24), h=160, x=12, y=12;
+  ctx.save(); ctx.translate(x,y); ctx.fillStyle="rgba(28,28,28,.9)"; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle="#444"; ctx.lineWidth=1; ctx.strokeRect(.5,.5,w,h);
+  const X=v=>34+(v-o.x0)/(o.x1-o.x0)*(w-46), Y=v=>h-26-(v-o.y0)/(o.y1-o.y0)*(h-44);
+  ctx.strokeStyle="#777"; ctx.beginPath(); ctx.moveTo(34,12); ctx.lineTo(34,h-26); ctx.lineTo(w-8,h-26); ctx.stroke();
+  ctx.save(); ctx.beginPath(); ctx.rect(34,12,w-42,h-38); ctx.clip();
+  for (const c of o.curves){ ctx.strokeStyle=c.col; ctx.lineWidth=c.w||2; ctx.setLineDash(c.dash||[]); ctx.beginPath();
+    for (let i=0;i<=80;i++){ const v=o.x0+(o.x1-o.x0)*i/80; i?ctx.lineTo(X(v),Y(c.f(v))):ctx.moveTo(X(v),Y(c.f(v))); } ctx.stroke(); }
+  ctx.setLineDash([]); ctx.fillStyle="#ffd166"; for (const q of S.pts){ ctx.beginPath(); ctx.arc(X(q.x),Y(q.y),3.5,0,7); ctx.fill(); }
+  ctx.fillStyle="#fff"; ctx.strokeStyle="#fc6255"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(X(o.live[0]),Y(o.live[1]),5,0,7); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle="#8a8a85"; ctx.font="12px system-ui"; ctx.textAlign="right"; ctx.fillText(o.xl,w-8,h-10); ctx.textAlign="left"; ctx.fillText(o.yl,38,22);
+  ctx.fillText(o.title,10,h-8===0?0:h-8); ctx.restore();
+}
+
+/* ---------- steps ---------- */
+const sl=(label,k,min,max,step,fm=v=>fmt(v,v%1?1:0))=>({label,min,max,step,get:()=>S[k],set:v=>S[k]=v,fmt:fm});
+const addBtn=get=>({btn:"Додати точку",fn:()=>{ S.pts.push(get()); }}), clrBtn={btn:"Очистити",fn:()=>{ S.pts=[]; }};
+const steps=[
+ {title:"1. Звідки береться тиск",
+  html:`<p>Молекули летять вільно й пружно відбиваються від стінок. Кожен удар передає стінці імпульс. Сума ударів і є <b>тиск</b>: з основного рівняння МКТ p = n₀kT (14.13), де n₀ = n/V — концентрація молекул.</p>
+  <p>Крутити можна три ручки: <b>n</b>, <b>T</b>, <b>об'єм</b>. Виміряний тиск (удари) збігається з формулою. Помножте на V — і отримаєте pV = nkT (14.14).</p>
+  <p class="ref">т. 1, § 14.6, с. 311–313</p>
+  <p class="add">Модель двовимірна: замість V — площа, але pV = nkT виходить так само.</p>`,
+  f:`<div><i>p</i> = <i>n</i><sub>0</sub><i>kT</i> &nbsp;(14.13)</div><div><i>pV</i> = <i>nkT</i> &nbsp;(14.14)</div><div><i>pV</i> = ν<i>RT</i> &nbsp;(14.17)</div><div><i>pV</i> = (<i>m</i>/<i>M</i>) <i>RT</i> &nbsp;(14.18)</div>`,
+  n:`Рівняння Клапейрона–Менделєєва: (14.18).`,
+  init(){ S.N=NN;S.T=2;S.Wt=6; }, ctl:[sl("n","N",20,300,1),sl("T","T",.5,4,.05),sl("V","Wt",2.5,10,.1,v=>fmt(v*BH,0))],
+  setup(){ A.N!==S.N&&A.setN(S.N); A.T=S.T; A.Wt=S.Wt; },
+  draw(){ const n0=A.N/A.A; return `p виміряне = ${fmt(A.p,2)}\np = n₀kT = ${fmt(n0*A.T,2)}   (n₀ = ${fmt(n0,2)})\npV/(nkT) = ${fmt(A.p*A.A/(A.N*A.T),2)}`; }},
+ {title:"2. Ізотермічний процес (T = const)",
+  html:`<p>Тримаємо T. Стискаємо газ: молекул ті самі, об'єм менший, удари частіші — тиск росте. Добуток <b>pV = const</b> (закон <b>Бойля–Маріотта</b>), графік на p–V — гіпербола (ізотерма).</p>
+  <p>Зменши V і натискай «Додати точку»: усі точки лягають на одну гіперболу. Змініть T — крива зміститься: вище T — вища ізотерма.</p>
+  <p class="ref">т. 1, § 14.7, с. 313–314 (рис. 14.5)</p>`,
+  f:`<div><i>pV</i> = const &nbsp;(14.22)</div><div><i>T</i> = const, <i>m</i> = const</div>`,
+  n:`Термостат підтримує T, поки міняється V.`,
+  init(){ S.N=NN;S.T=2;S.Wt=6; S.pts=[]; }, ctl:[sl("T","T",1,4,.05),sl("V","Wt",2.5,10,.1,v=>fmt(v*BH,0)),addBtn(()=>({x:A.A,y:A.p})),clrBtn],
+  setup(){ A.N!==NN&&A.setN(NN); A.T=S.T; A.Wt=S.Wt; },
+  draw(){ plot({title:"p – V",xl:"V",yl:"p",x0:10,x1:52,y0:0,y1:28,live:[A.A,A.p],
+      curves:[{f:v=>NN*S.T/v,col:"#58c4dd"},{f:v=>NN*S.T*1.8/v,col:"#6b6b66",dash:[4,4],w:1.5}]});
+    return `T = ${fmt(A.T,2)},  V = ${fmt(A.A,1)}\np·V = ${fmt(A.p*A.A,1)}   (nkT = ${fmt(NN*A.T,1)})`; }},
+ {title:"3. Ізобарний процес (p = const)",
+  html:`<p>Поршень вільний, і зовнішній тиск p сталий. Нагріваємо газ: молекули швидші — б'ють сильніше, і поршень відходить доти, поки тиск знову не стане p. Тому <b>V/T = const</b> (закон <b>Гей-Люссака</b>).</p>
+  <p>Повертай T і дивись, як поршень «пливе». На графіку V–T пряма йде в початок координат.</p>
+  <p class="ref">т. 1, § 14.7, с. 314–315 (рис. 14.6)</p>`,
+  f:`<div><i>V</i>/<i>T</i> = const &nbsp;(14.25)</div><div><i>V</i> = <i>V</i><sub>0</sub>(1 + α<i>t</i>) &nbsp;(14.26)</div><div>α ≈ 1/273 К⁻¹</div>`,
+  n:`Поршень сам займає положення, де тиск газу = p.`,
+  init(){ S.N=NN;S.T=1.6;S.p0=5; S.pts=[]; }, ctl:[sl("T","T",.4,2.4,.02),sl("p","p0",3,8,.05),addBtn(()=>({x:A.T,y:A.A})),clrBtn],
+  setup(){ A.N!==NN&&A.setN(NN); A.T=S.T; const w=NN*S.T/(S.p0*BH); S.msg=w<2||w>10?"\n(поза діапазоном поршня)":""; A.Wt=Math.max(2,Math.min(10,w)); },
+  draw(){ plot({title:"V – T",xl:"T",yl:"V",x0:0,x1:2.5,y0:0,y1:60,live:[A.T,A.A],
+      curves:[{f:v=>NN*v/S.p0,col:"#58c4dd"},{f:v=>NN*v/(S.p0*1.6),col:"#6b6b66",dash:[4,4],w:1.5}]});
+    return `T = ${fmt(A.T,2)},  V = ${fmt(A.A,1)}\nV/T = ${fmt(A.A/A.T,1)}   (n/p = ${fmt(NN/S.p0,1)})\np виміряне = ${fmt(A.p,2)}`+S.msg; }},
+ {title:"4. Ізохорний процес (V = const)",
+  html:`<p>Поршень закріплено: V не змінюється. Нагріваємо — швидкість молекул росте, кожен удар сильніший, ударів більше. Тиск пропорційний T: <b>p/T = const</b>.</p>
+  <p>На графіку p–T пряма виходить із початку координат: при T = 0 тиску немає. Точки лягають на пряму.</p>
+  <p class="ref">т. 1, § 14.7, с. 315–316 (рис. 14.7)</p>
+  <p class="add">У підручнику цей закон не названо іменем Шарля.</p>`,
+  f:`<div><i>p</i>/<i>T</i> = const &nbsp;(14.28)</div><div><i>p</i> = <i>p</i><sub>0</sub>(1 + β<i>t</i>) &nbsp;(14.29)</div><div>β = α ≈ 1/273 К⁻¹</div>`,
+  n:`Тут V і n сталі.`,
+  init(){ S.N=NN;S.T=1.5;S.Wt=6; S.pts=[]; }, ctl:[sl("T","T",.4,4,.05),sl("V","Wt",2.5,10,.1,v=>fmt(v*BH,0)),addBtn(()=>({x:A.T,y:A.p})),clrBtn],
+  setup(){ A.N!==NN&&A.setN(NN); A.T=S.T; A.Wt=S.Wt; },
+  draw(){ plot({title:"p – T",xl:"T",yl:"p",x0:0,x1:4.2,y0:0,y1:18,live:[A.T,A.p],
+      curves:[{f:v=>NN*v/(S.Wt*BH),col:"#58c4dd"}]});
+    return `T = ${fmt(A.T,2)}\np = ${fmt(A.p,2)},  p/T = ${fmt(A.p/A.T,2)}   (n/V = ${fmt(NN/A.A,2)})`; }},
+ {title:"5. Закон Авогадро",
+  html:`<p>Дві «посудини» — легкі молекули (ліворуч) та важкі, у 4 рази масивніші (праворуч). Температура однакова, тож важкі <b>повільніші</b>. Колір точки — її швидкість. Закон Авогадро: у рівних об'ємах при однакових T і p міститься однакове число молекул.</p>
+  <p>Підбери праву посудину так, щоб тиск і об'єм збіглися з лівою. Скільки там молекул? Для газу з n = pV/(kT) маса молекули нічого не вирішує.</p>
+  <p class="ref">т. 1, § 14.7, с. 316</p>`,
+  f:`<div><i>pV</i> = <i>nkT</i> ⟹ <i>n</i> = <i>pV</i>/<i>kT</i></div><div>однакові <i>p, V, T</i> ⟹ однакове <i>n</i></div>`,
+  n:`Маса молекули m у формулу не входить.`,
+  init(){ S.T=2;S.NB=160;S.WtB=4; A.setN(NN); }, ctl:[sl("T","T",.8,4,.05),sl("n (право)","NB",40,240,1),sl("V (право)","WtB",2,7,.1,v=>fmt(v*BH,0))],
+  setup(){ A.N!==NN&&A.setN(NN); A.T=S.T; A.Wt=4; B.N!==S.NB&&B.setN(S.NB); B.T=S.T; B.Wt=S.WtB; },
+  draw(){ const same=Math.abs(A.p-B.p)/Math.max(A.p,.1)<.08 && Math.abs(A.A-B.A)<.8;
+    return `ліво:  n = ${A.N}, V = ${fmt(A.A,0)}, p = ${fmt(A.p,2)}\nправо: n = ${B.N}, V = ${fmt(B.A,0)}, p = ${fmt(B.p,2)}\n`+(same?(A.N===B.N?"p, V, T однакові ⟹ n однакове ✓":"p, V, T збіглися, але n різне?"):"підбери p і V правої посудини");} },
+];
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id), dots=$("dots");
+steps.forEach((_,i)=>{ const d=document.createElement("span"); d.onclick=()=>go(i); dots.appendChild(d); });
+function go(i){
+  S.step=Math.max(0,Math.min(steps.length-1,i)); const st=steps[S.step]; S.pts=[]; st.init();
+  $("ctitle").textContent=st.title; $("ctext").innerHTML=st.html; $("fbody").innerHTML=st.f; $("fnote").textContent=st.n;
+  const c=$("controls"); c.innerHTML="";
+  st.ctl.forEach(s=>{
+    if (s.btn){ const b=document.createElement("button"); b.textContent=s.btn; b.onclick=()=>s.fn(); c.appendChild(b); return; }
+    const l=document.createElement("label"), v=document.createElement("span"), inp=document.createElement("input");
+    inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=s.get();
+    const upd=()=>{ v.textContent=s.fmt(s.get()); }; inp.oninput=()=>{ s.set(+inp.value); upd(); }; l.append(s.label+" ",inp,v); upd(); c.appendChild(l);
+  });
+  [...dots.children].forEach((d,k)=>d.classList.toggle("on",k===S.step));
+  $("count").textContent=(S.step+1)+" / "+steps.length; history.replaceState(null,"","#"+(S.step+1));
+}
+$("prev").onclick=()=>go(S.step-1); $("next").onclick=()=>go(S.step+1);
+addEventListener("keydown",e=>{ if (e.key==="ArrowRight") go(S.step+1); if (e.key==="ArrowLeft") go(S.step-1); });
+if (innerWidth<720) $("formulas").open=false;
+
+/* ---------- loop ---------- */
+let last=performance.now(), tl=0;
+function loop(t){
+  const dt=Math.min(.05,(t-last)/1000)*TSCALE; last=t; const st=steps[S.step]; st.setup();
+  const sims=S.step===4?[A,B]:[A], sub=Math.max(1,Math.ceil(dt/.02));
+  for (let k=0;k<sub;k++) for (const s of sims) s.step(dt/sub);
+  ctx.clearRect(0,0,CW,CH);
+  const topY=CH*.47;
+  if (S.step===4){
+    const u=Math.min((CW-60)/(2*7.6), CH*.36/BH), oy=topY-BH*u/2, gap=(CW-2*7.6*u)/3;
+    drawSim(A,gap,oy,u,7,200,"легкі, m"); drawSim(B,gap*2+7.6*u,oy,u,7,25,"важкі, 4m");
+  } else {
+    const u=Math.min((CW-60)/10.8, CH*.36/BH), oy=topY-BH*u/2, ox=(CW-10.8*u)/2;
+    drawSim(A,ox,oy,u,10,200,null);
+  }
+  $("live").textContent=st.draw()||"";
+  requestAnimationFrame(loop);
+}
+resize(); go((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

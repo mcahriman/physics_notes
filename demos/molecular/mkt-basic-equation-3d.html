@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Основне рівняння МКТ 3D</title>
+<style>
+  :root { --bg:#1c1c1c; --fg:#e8e6df; --pos:#58c4dd; --neg:#fc6255; --acc:#ffd166; --dim:#8a8a85; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui,sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0; touch-action:none; cursor:grab; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  .panel { background:rgba(28,28,28,.9); border:1px solid #444; border-radius:10px; backdrop-filter:blur(4px); }
+  #card { position:absolute; left:12px; bottom:58px; width:min(450px,calc(100% - 24px)); padding:12px 16px; max-height:50%; overflow:auto; }
+  #card h2 { margin:0 0 4px; font-size:18px; color:var(--acc); cursor:pointer; }
+  #card h2::after { content:" ▾"; color:var(--dim); font-size:13px; }
+  #card.collapsed h2::after { content:" ▸"; }
+  #card.collapsed #ctext { display:none; }
+  #card p { margin:4px 0; }
+  #card ol, #card ul { margin:4px 0; padding-left:20px; }
+  #card .ref { color:var(--dim); font-size:12px; }
+  #card .add { color:var(--dim); font-size:12px; font-style:italic; }
+  #controls { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin-top:8px; }
+  #controls label { display:flex; gap:6px; align-items:center; color:var(--dim); }
+  #controls input[type=range] { width:110px; accent-color:var(--pos); }
+  #live { margin-top:6px; font:13px ui-monospace,monospace; color:var(--acc); white-space:pre-line; }
+  button { background:#2a2a2a; color:var(--fg); border:1px solid #444; border-radius:6px; padding:4px 12px; font:inherit; cursor:pointer; white-space:nowrap; }
+  button:hover { border-color:var(--pos); }
+  #formulas { position:absolute; top:10px; right:10px; width:min(300px,calc(100% - 24px)); padding:8px 12px; }
+  #formulas summary { cursor:pointer; font-weight:600; }
+  #formulas .f { font:15px/1.8 "STIX Two Math","Cambria Math",Georgia,serif; }
+  #formulas .f i { color:var(--pos); }
+  #formulas .n { color:var(--dim); font-size:12px; margin-top:4px; }
+  #nav { position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:10px; align-items:center; padding:6px 12px; }
+  #dots { display:flex; gap:7px; }
+  #dots span { width:10px; height:10px; border-radius:50%; background:#555; cursor:pointer; }
+  #dots span.on { background:var(--acc); }
+  #count { color:var(--dim); min-width:36px; text-align:center; }
+  #hint { position:absolute; left:12px; top:8px; width:min(260px,calc(100% - 340px)); color:var(--dim); font-size:12px; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="gl"></canvas><canvas id="ov"></canvas></div>
+<div id="hint">тягни — обертати · клік по осі гізмо — дивитись уздовж неї · по його фону — скинути вигляд</div>
+<details id="formulas" class="panel" open>
+  <summary>Формули</summary><div class="f" id="fbody"></div><div class="n" id="fnote"></div>
+</details>
+<div id="card" class="panel"><h2 id="ctitle"></h2><div id="ctext"></div><div id="controls"></div><div id="live"></div></div>
+<div id="nav" class="panel"><button id="prev">←</button><div id="dots"></div><span id="count"></span><button id="next">→</button><button id="trails">сліди: так</button></div>
+
+<script>
+"use strict";
+/* Ideal gas in a cube, 3D, k = 1, m₀ = 1 unless said otherwise, arbitrary units.
+   Molecules are points flying freely and bouncing elastically (the book's model, § 14.2).
+   Pressure on a wall = momentum given to it per unit time and area, measured separately for the x, y and z walls. */
+const stage=document.getElementById("stage"), ov=document.getElementById("ov"), ctx=ov.getContext("2d");
+const gl=document.getElementById("gl").getContext("webgl2",{antialias:true});
+let CW=0,CH=0,DPR=1;
+function resize(){ DPR=Math.min(devicePixelRatio||1,2); CW=stage.clientWidth; CH=stage.clientHeight;
+  for (const c of [gl.canvas,ov]){ c.width=CW*DPR; c.height=CH*DPR; } ctx.setTransform(DPR,0,0,DPR,0,0); gl.viewport(0,0,CW*DPR,CH*DPR); }
+addEventListener("resize",resize);
+
+/* ---------- simulation ---------- */
+const TSCALE=3, TR_N=20, TR_L=70, TAU=6, RC=.14;       // sim-time speed-up, tracked molecules, trail frames, pressure window, collision radius
+const AXCOL=["#fc6255","#7bd88f","#58c4dd"], AXRGB=[[.99,.38,.33],[.48,.85,.56],[.35,.77,.87]];
+const gauss=()=>Math.sqrt(-2*Math.log(Math.random()+1e-12))*Math.cos(2*Math.PI*Math.random());
+class Sim {
+  constructor(o){
+    this.m=o.m||1; this.L=o.L||3; this.off=o.off||[0,0,0]; this.T=o.T||2; this.therm=o.therm!==false; this.collide=!!o.collide;
+    this.colorGroups=!!o.colorGroups; this.mode="chaos"; this.N=0; this.time=0;
+    this.x=[];this.y=[];this.z=[];this.vx=[];this.vy=[];this.vz=[];this.grp=[]; this.buf=new Float32Array(4*400);
+    this.hist=new Float32Array(TR_N*TR_L*3); this.head=0; this.hc=0;
+    this.acc=[0,0,0]; this.p=[0,0,0]; this.glow=[0,0,0,0,0,0]; this.resetCount();
+  }
+  resetCount(){ this.hitsR=0; this.impR=0; this.tR=0; this.firstHit=null; this.lastHit=null; }
+  add(n,T,xr=[0,1],g=0){ const s=Math.sqrt(T/this.m);
+    for (let i=0;i<n;i++){ this.x.push((xr[0]+Math.random()*(xr[1]-xr[0]))*this.L); this.y.push(Math.random()*this.L); this.z.push(Math.random()*this.L);
+      this.vx.push(gauss()*s); this.vy.push(gauss()*s); this.vz.push(gauss()*s); this.grp.push(g); } this.N=this.x.length; this.hc=0; }
+  setN(n){ n=Math.round(n); if (n>this.N) this.add(n-this.N,this.T); while (this.x.length>n) for (const a of [this.x,this.y,this.z,this.vx,this.vy,this.vz,this.grp]) a.pop(); this.N=n; this.hc=0; }
+  setMode(m){ this.mode=m; if (m==="x") for (let i=0;i<this.N;i++){ const v=Math.hypot(this.vx[i],this.vy[i],this.vz[i]); this.vx[i]=(Math.random()<.5?-1:1)*v; this.vy[i]=0; this.vz[i]=0; } }
+  get V(){ return this.L**3; }
+  meanKE(sel){ let e=0,c=0; for (let i=0;i<this.N;i++) if (sel===undefined||this.grp[i]===sel){ e+=.5*this.m*(this.vx[i]**2+this.vy[i]**2+this.vz[i]**2); c++; } return c?e/c:0; }
+  record(){ this.head=(this.head+1)%TR_L; const M=Math.min(this.N,TR_N);
+    for (let i=0;i<M;i++){ const o=(i*TR_L+this.head)*3; this.hist[o]=this.x[i]; this.hist[o+1]=this.y[i]; this.hist[o+2]=this.z[i]; } this.hc=Math.min(this.hc+1,TR_L); }
+  step(dt){
+    const m=this.m, n=this.N, L=this.L, imp=[0,0,0], g=this.glow; this.time+=dt; this.tR+=dt;
+    for (let i=0;i<n;i++){
+      let x=this.x[i]+this.vx[i]*dt, y=this.y[i]+this.vy[i]*dt, z=this.z[i]+this.vz[i]*dt, vx=this.vx[i], vy=this.vy[i], vz=this.vz[i];
+      if (x<0){ x=-x; imp[0]+=2*m*(-vx); vx=-vx; g[0]=Math.min(.8,g[0]+.15); }
+      if (x>L){ x=2*L-x; imp[0]+=2*m*vx; g[1]=Math.min(.8,g[1]+.15);
+        if (i===0){ this.hitsR++; this.impR+=2*m*vx; if (this.firstHit===null) this.firstHit=this.time; this.lastHit=this.time; g[1]=.9; } vx=-vx; }
+      if (y<0){ y=-y; imp[1]+=2*m*(-vy); vy=-vy; g[2]=Math.min(.8,g[2]+.15); } if (y>L){ y=2*L-y; imp[1]+=2*m*vy; vy=-vy; g[3]=Math.min(.8,g[3]+.15); }
+      if (z<0){ z=-z; imp[2]+=2*m*(-vz); vz=-vz; g[4]=Math.min(.8,g[4]+.15); } if (z>L){ z=2*L-z; imp[2]+=2*m*vz; vz=-vz; g[5]=Math.min(.8,g[5]+.15); }
+      this.x[i]=x;this.y[i]=y;this.z[i]=z;this.vx[i]=vx;this.vy[i]=vy;this.vz[i]=vz;
+    }
+    if (this.collide) this.collisions();
+    if (this.therm){ const sg=Math.sqrt(this.T/m), pr=1.5*dt;
+      for (let i=0;i<n;i++) if (Math.random()<pr){ const a=gauss()*sg, b=gauss()*sg, c=gauss()*sg;
+        if (this.mode==="x"){ this.vx[i]=(Math.random()<.5?-1:1)*Math.hypot(a,b,c); this.vy[i]=0; this.vz[i]=0; } else { this.vx[i]=a; this.vy[i]=b; this.vz[i]=c; } } }
+    const e=Math.exp(-dt/TAU); for (let k=0;k<3;k++){ this.acc[k]=this.acc[k]*e+imp[k]; this.p[k]=this.acc[k]/(TAU*2*L*L); }
+    for (let k=0;k<6;k++) g[k]*=Math.exp(-dt*5);
+  }
+  collisions(){                                   // equal-mass elastic spheres: swap the normal velocity components
+    const n=this.N, d2=4*RC*RC;
+    for (let i=0;i<n;i++) for (let j=i+1;j<n;j++){
+      const dx=this.x[i]-this.x[j]; if (dx>2*RC||dx<-2*RC) continue; const dy=this.y[i]-this.y[j]; if (dy>2*RC||dy<-2*RC) continue; const dz=this.z[i]-this.z[j];
+      const r2=dx*dx+dy*dy+dz*dz; if (r2>=d2||r2<1e-9) continue; const r=Math.sqrt(r2), nx=dx/r, ny=dy/r, nz=dz/r;
+      const vn=(this.vx[i]-this.vx[j])*nx+(this.vy[i]-this.vy[j])*ny+(this.vz[i]-this.vz[j])*nz; if (vn>=0) continue;
+      this.vx[i]-=vn*nx; this.vy[i]-=vn*ny; this.vz[i]-=vn*nz; this.vx[j]+=vn*nx; this.vy[j]+=vn*ny; this.vz[j]+=vn*nz;
+    }
+  }
+}
+let sims=[];
+
+/* ---------- state ---------- */
+const S={step:0, N:120, T:2, l:3, v:2, mode:"chaos", series:[], nextSample:0, yaw:.6, pitch:.35, ty:.6, tp:.35, snap:false, trails:true, drag:false};
+const DEFAULT_VIEW=[[.6,.35],[.6,.35],[.6,.35],[.35,.5],[.6,.35]];
+const fmt=(v,n=2)=>v.toFixed(n);
+
+/* ---------- WebGL ---------- */
+function sh(t,s){ const o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o); if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(o); return o; }
+function prog(v,f){ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,v)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,f)); gl.linkProgram(p); return p; }
+const pts=prog(`#version 300 es
+in vec3 aPos; in float aSp; uniform mat4 uMVP; uniform vec3 uOff; uniform float uSize, uProj; out float vT;
+void main(){ vec4 c=uMVP*vec4(aPos+uOff,1.); gl_Position=c; gl_PointSize=clamp(uSize*uProj/c.w,2.,60.); vT=aSp; }`,
+`#version 300 es
+precision mediump float; in float vT; uniform float uMark; out vec4 o;
+void main(){ vec2 q=gl_PointCoord*2.-1.; float r2=dot(q,q); if(r2>1.) discard; vec3 n=vec3(q.x,-q.y,sqrt(1.-r2));
+  float l=.35+.65*max(dot(n,normalize(vec3(-.4,.6,.7))),0.); float t=clamp(vT,0.,1.);
+  vec3 col=mix(vec3(.30,.60,1.),vec3(1.,.55,.20),t); col=mix(col,vec3(1.),.45*uMark); o=vec4(col*l+.15*uMark,1.); }`);
+const trl=prog(`#version 300 es
+in vec3 aPos; in float aAge; in float aSp; uniform mat4 uMVP; uniform vec3 uOff; out float vAge; out float vSp;
+void main(){ gl_Position=uMVP*vec4(aPos+uOff,1.); vAge=aAge; vSp=aSp; }`,
+`#version 300 es
+precision mediump float; in float vAge; in float vSp; out vec4 o;
+void main(){ float a=pow(1.-vAge,1.1); vec3 col=mix(vec3(.30,.60,1.),vec3(1.,.55,.20),clamp(vSp,0.,1.)); col=mix(col,vec3(1.),.6*a); o=vec4(col,a); }`);
+const lin=prog(`#version 300 es
+in vec3 aPos; uniform mat4 uMVP; uniform vec3 uOff; void main(){ gl_Position=uMVP*vec4(aPos+uOff,1.); }`,
+`#version 300 es
+precision mediump float; uniform vec4 uCol; out vec4 o; void main(){ o=uCol; }`);
+const pbuf=gl.createBuffer(), lbuf=gl.createBuffer();
+const U=(p,n)=>gl.getUniformLocation(p,n);
+const mul=(a,b)=>{ const o=new Float32Array(16); for (let c=0;c<4;c++) for (let r=0;r<4;r++){ let s=0; for (let k=0;k<4;k++) s+=a[k*4+r]*b[c*4+k]; o[c*4+r]=s; } return o; };
+const persp=(f,a,n,fa)=>{ const t=1/Math.tan(f/2), o=new Float32Array(16); o[0]=t/a; o[5]=t; o[10]=(fa+n)/(n-fa); o[11]=-1; o[14]=2*fa*n/(n-fa); return o; };
+const trans=(x,y,z)=>new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]);
+const rotX=a=>{ const c=Math.cos(a),s=Math.sin(a); return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]); };
+const rotY=a=>{ const c=Math.cos(a),s=Math.sin(a); return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]); };
+const FOV=40*Math.PI/180;
+
+function drawLines(arr,mode,col,off,mvp){
+  gl.useProgram(lin); gl.bindBuffer(gl.ARRAY_BUFFER,lbuf); gl.bufferData(gl.ARRAY_BUFFER,arr,gl.DYNAMIC_DRAW);
+  const l=gl.getAttribLocation(lin,"aPos"); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,3,gl.FLOAT,false,0,0);
+  gl.uniformMatrix4fv(U(lin,"uMVP"),false,mvp); gl.uniform3fv(U(lin,"uOff"),off); gl.uniform4fv(U(lin,"uCol"),col); gl.drawArrays(mode,0,arr.length/3);
+}
+function cubeLines(L){
+  const v=[], P=[[0,0,0],[L,0,0],[L,L,0],[0,L,0],[0,0,L],[L,0,L],[L,L,L],[0,L,L]];
+  for (const [a,b] of [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]]) v.push(...P[a],...P[b]); return new Float32Array(v);
+}
+function faceQuad(f,L){                            // f: 0/1 = x0/xL, 2/3 = y, 4/5 = z
+  const ax=f>>1, c=(f&1)?L:0, q=[[0,0],[L,0],[0,L],[L,L]], v=[];
+  for (const [a,b] of q){ const p=[0,0,0]; p[ax]=c; p[(ax+1)%3]=a; p[(ax+2)%3]=b; v.push(...p); } return new Float32Array(v);
+}
+function renderTrails(sim,mvp){
+  if (sim.hc<2) return;
+  const M=Math.min(sim.N,TR_N), segs=sim.hc-1, out=new Float32Array(M*segs*2*5), s0=Math.sqrt(sim.T/sim.m); let k=0;
+  const at=(i,a)=>((i*TR_L+((sim.head-a+TR_L)%TR_L))*3);
+  for (let i=0;i<M;i++){ const sp=sim.colorGroups?sim.grp[i]:Math.hypot(sim.vx[i],sim.vy[i],sim.vz[i])/(2.6*s0);
+    for (let a=0;a<segs;a++) for (const b of [a,a+1]){ const o=at(i,b);
+      out[k++]=sim.hist[o]; out[k++]=sim.hist[o+1]; out[k++]=sim.hist[o+2]; out[k++]=b/segs; out[k++]=sp; } }
+  gl.useProgram(trl); gl.bindBuffer(gl.ARRAY_BUFFER,lbuf); gl.bufferData(gl.ARRAY_BUFFER,out,gl.DYNAMIC_DRAW);
+  const p=gl.getAttribLocation(trl,"aPos"), g=gl.getAttribLocation(trl,"aAge"), v=gl.getAttribLocation(trl,"aSp");
+  gl.enableVertexAttribArray(p); gl.vertexAttribPointer(p,3,gl.FLOAT,false,20,0);
+  gl.enableVertexAttribArray(g); gl.vertexAttribPointer(g,1,gl.FLOAT,false,20,12);
+  gl.enableVertexAttribArray(v); gl.vertexAttribPointer(v,1,gl.FLOAT,false,20,16);
+  gl.uniformMatrix4fv(U(trl,"uMVP"),false,mvp); gl.uniform3fv(U(trl,"uOff"),sim.off);
+  gl.depthMask(false); gl.drawArrays(gl.LINES,0,k/5); gl.depthMask(true); gl.disableVertexAttribArray(g); gl.disableVertexAttribArray(v);
+}
+function renderSim(sim,mvp,projScale,size){
+  const n=sim.N, b=sim.buf, s0=Math.sqrt(sim.T/sim.m);
+  for (let i=0;i<n;i++){ b[4*i]=sim.x[i]; b[4*i+1]=sim.y[i]; b[4*i+2]=sim.z[i];
+    b[4*i+3]=sim.colorGroups?sim.grp[i]:Math.hypot(sim.vx[i],sim.vy[i],sim.vz[i])/(2.6*s0); }
+  gl.useProgram(pts); gl.bindBuffer(gl.ARRAY_BUFFER,pbuf); gl.bufferData(gl.ARRAY_BUFFER,b.subarray(0,4*n),gl.DYNAMIC_DRAW);
+  const a=gl.getAttribLocation(pts,"aPos"), s=gl.getAttribLocation(pts,"aSp");
+  gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a,3,gl.FLOAT,false,16,0); gl.enableVertexAttribArray(s); gl.vertexAttribPointer(s,1,gl.FLOAT,false,16,12);
+  gl.uniformMatrix4fv(U(pts,"uMVP"),false,mvp); gl.uniform3fv(U(pts,"uOff"),sim.off); gl.uniform1f(U(pts,"uSize"),size); gl.uniform1f(U(pts,"uProj"),projScale);
+  gl.uniform1f(U(pts,"uMark"),0); gl.drawArrays(gl.POINTS,0,n);
+  if (S.trails){ gl.uniform1f(U(pts,"uMark"),1); gl.uniform1f(U(pts,"uSize"),size*1.55); gl.drawArrays(gl.POINTS,0,Math.min(n,TR_N)); }
+  gl.disableVertexAttribArray(s);
+  if (S.trails) renderTrails(sim,mvp);
+  drawLines(cubeLines(sim.L),gl.LINES,[.62,.62,.58,1],sim.off,mvp);
+  gl.depthMask(false);                                       // walls glow (colour = axis) when molecules hit them
+  for (let f=0;f<6;f++){ const c=AXRGB[f>>1]; drawLines(faceQuad(f,sim.L),gl.TRIANGLE_STRIP,[c[0],c[1],c[2],.035+.5*sim.glow[f]],sim.off,mvp); }
+  gl.depthMask(true);
+}
+
+/* ---------- overlay helpers ---------- */
+function bars(sim,pForm){                                    // p_x, p_y, p_z against 2/3 n0<ε>
+  const x=12, y=96, w=Math.min(220,CW-24), mx=Math.max(pForm*2.2,sim.p[0],sim.p[1],sim.p[2],.01);
+  ctx.save(); ctx.fillStyle="rgba(28,28,28,.88)"; ctx.fillRect(x,y,w,96); ctx.strokeStyle="#444"; ctx.strokeRect(x+.5,y+.5,w,96);
+  ctx.font="12px system-ui"; ctx.textBaseline="middle";
+  ["pₓ","pᵧ","pᵣ"].forEach((nm,k)=>{ const yy=y+18+k*22, bw=(w-60)*Math.min(1,sim.p[k]/mx);
+    ctx.fillStyle=AXCOL[k]; ctx.fillRect(x+34,yy-6,Math.max(1,bw),12); ctx.fillStyle="#e8e6df"; ctx.textAlign="left"; ctx.fillText(nm,x+8,yy); });
+  const lx=x+34+(w-60)*Math.min(1,pForm/mx); ctx.strokeStyle="#ffd166"; ctx.setLineDash([4,3]); ctx.beginPath(); ctx.moveTo(lx,y+6); ctx.lineTo(lx,y+78); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#ffd166"; ctx.textAlign="left"; ctx.fillText("⅔ n₀⟨ε⟩ (14.6)",x+8,y+88); ctx.restore();
+}
+function seriesPlot(o){
+  const w=Math.min(250,CW-24), h=150, x=12, y=96;
+  ctx.save(); ctx.translate(x,y); ctx.fillStyle="rgba(28,28,28,.9)"; ctx.fillRect(0,0,w,h); ctx.strokeStyle="#444"; ctx.strokeRect(.5,.5,w,h);
+  const X=v=>34+(v-o.x0)/(o.x1-o.x0)*(w-46), Y=v=>h-26-(v-o.y0)/(o.y1-o.y0)*(h-44);
+  ctx.strokeStyle="#777"; ctx.beginPath(); ctx.moveTo(34,12); ctx.lineTo(34,h-26); ctx.lineTo(w-8,h-26); ctx.stroke();
+  ctx.save(); ctx.beginPath(); ctx.rect(34,12,w-42,h-38); ctx.clip();
+  ctx.strokeStyle="#ffd166"; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(34,Y(o.ref)); ctx.lineTo(w,Y(o.ref)); ctx.stroke(); ctx.setLineDash([]);
+  for (const [k,col] of [[1,"#fc8c4c"],[2,"#58a6ff"]]){ ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath(); S.series.forEach((p,i)=>{ i?ctx.lineTo(X(p[0]),Y(p[k])):ctx.moveTo(X(p[0]),Y(p[k])); }); ctx.stroke(); }
+  ctx.restore(); ctx.fillStyle="#8a8a85"; ctx.font="12px system-ui"; ctx.textAlign="right"; ctx.fillText("час",w-8,h-10); ctx.textAlign="left"; ctx.fillText("⟨ε⟩",38,22);
+  ctx.fillStyle="#fc8c4c"; ctx.fillText("гарячі",10,h-8); ctx.fillStyle="#58a6ff"; ctx.fillText("холодні",62,h-8); ctx.fillStyle="#ffd166"; ctx.fillText("3kT/2",125,h-8); ctx.restore();
+}
+
+/* ---------- steps ---------- */
+const sl=(label,k,min,max,step,fm=v=>fmt(v,v%1?1:0))=>({label,min,max,step,get:()=>S[k],set:v=>S[k]=v,fmt:fm});
+const mkCube=(o={})=>new Sim(o);
+const steps=[
+ {title:"1. Модель ідеального газу",
+  html:`<p>Основні положення МКТ газів. Молекули — однакові кульки зневажливо малого розміру; між ними немає сил; зіткнення пружні; між зіткненнями рух рівномірний прямолінійний; без зовнішніх сил молекули рівномірно заповнюють об'єм; усі напрями швидкості рівноймовірні — «молекулярний хаос».</p>
+  <p>Подивись на цифри: середні ⟨v<sub>x</sub>⟩, ⟨v<sub>y</sub>⟩, ⟨v<sub>z</sub>⟩ ≈ 0, а ⟨v<sub>x</sub>²⟩ ≈ ⟨v<sub>y</sub>²⟩ ≈ ⟨v<sub>z</sub>²⟩, і половина молекул у лівій половині куба. Це «хаос» і рівномірність. Стінки спалахують там, де в них б'ють молекули. Білі яскраві точки зі слідами — 20 «мічених» молекул.</p>
+  <p class="ref">т. 1, § 14.2, с. 299–300</p>`,
+  f:`<div>⟨<i>v<sub>x</sub></i>⟩ = ⟨<i>v<sub>y</sub></i>⟩ = ⟨<i>v<sub>z</sub></i>⟩ = 0</div><div>⟨<i>v<sub>x</sub></i>²⟩ = ⟨<i>v<sub>y</sub></i>²⟩ = ⟨<i>v<sub>z</sub></i>²⟩</div>`,
+  n:`Друга рівність — наслідок хаосу; книга використовує її як p_x = p_y = p_z.`,
+  ctl:[],
+  init(){ sims=[mkCube({L:3,T:2,therm:true})]; sims[0].add(120,2); },
+  setup(){},
+  draw(){ const s=sims[0], n=s.N; let a=[0,0,0],b=[0,0,0],left=0;
+    for (let i=0;i<n;i++){ a[0]+=s.vx[i];a[1]+=s.vy[i];a[2]+=s.vz[i]; b[0]+=s.vx[i]**2;b[1]+=s.vy[i]**2;b[2]+=s.vz[i]**2; if (s.x[i]<s.L/2) left++; }
+    return `⟨vₓ⟩ = ${fmt(a[0]/n)}, ⟨v_y⟩ = ${fmt(a[1]/n)}, ⟨v_z⟩ = ${fmt(a[2]/n)}\n⟨vₓ²⟩ = ${fmt(b[0]/n)}, ⟨v_y²⟩ = ${fmt(b[1]/n)}, ⟨v_z²⟩ = ${fmt(b[2]/n)}\nу лівій половині: ${fmt(100*left/n,0)} %`; }},
+ {title:"2. Одна молекула в кубі",
+  html:`<p>Куб з ребром l. Одна молекула б'ється об праву стінку: її x-складова швидкості змінюється з v<sub>x</sub> на −v<sub>x</sub>, тому стінка отримує імпульс <b>Δp = 2m₀v<sub>x</sub></b>.</p>
+  <p>Назад до тієї самої стінки молекула вертається через <b>Δt = 2l/v<sub>x</sub></b>. Середня сила <b>f = Δp/Δt = m₀v<sub>x</sub>²/l</b>. Змінюй l і v<sub>x</sub>: виміряна сила збігається з формулою. Права стінка спалахує при кожному ударі.</p>
+  <p class="ref">т. 1, § 14.3, с. 301–302, рис. 14.1</p>`,
+  f:`<div>Δ<i>p</i> = 2<i>m</i><sub>0</sub><i>v<sub>x</sub></i></div><div>Δ<i>t</i> = 2<i>l</i> / <i>v<sub>x</sub></i></div><div><i>f</i> = <i>m</i><sub>0</sub><i>v<sub>x</sub></i>² / <i>l</i></div>`,
+  n:`Інші складові (v_y, v_z) не змінюють тиску на праву стінку.`,
+  ctl:[sl("l","l",1.5,5,.05),sl("vₓ","v",.5,4,.05)],
+  init(){ S.l=3; S.v=2; const s=mkCube({L:3,therm:false}); s.x=[1.1];s.y=[1.3];s.z=[1.5];s.vx=[2];s.vy=[.9];s.vz=[.6];s.grp=[0];s.N=1; sims=[s]; S.last=[3,2]; },
+  setup(){ const s=sims[0]; if (S.l!==S.last[0]||S.v!==S.last[1]){ s.L=S.l; s.x[0]=Math.min(s.x[0],s.L*.95); s.y[0]=Math.min(s.y[0],s.L*.95); s.z[0]=Math.min(s.z[0],s.L*.95);
+      s.vx[0]=Math.sign(s.vx[0]||1)*S.v; s.resetCount(); S.last=[S.l,S.v]; } },
+  draw(){ const s=sims[0], vx=Math.abs(s.vx[0]), dp=2*vx, hits=s.hitsR;
+    const dt=hits>1?(s.lastHit-s.firstHit)/(hits-1):NaN, fav=s.tR>0?s.impR/s.tR:0;
+    return `ударів у праву стінку: ${hits}\nΔp = 2m₀vₓ = ${fmt(dp)}\nΔt: виміряне = ${isNaN(dt)?"…":fmt(dt,3)},  2l/vₓ = ${fmt(2*s.L/vx,3)}\nf середня = ${fmt(fav,3)},  m₀vₓ²/l = ${fmt(vx*vx/s.L,3)}`; }},
+ {title:"3. Багато молекул: основне рівняння",
+  html:`<p>Додаємо силу всіх n молекул і ділимо на площу стінки l². Оскільки всі напрями рівноймовірні, тиски на стінки x, y, z <b>однакові</b>: p<sub>x</sub> = p<sub>y</sub> = p<sub>z</sub>. Тому вийшло <b>основне рівняння МКТ</b>: p = ⅔·n₀·⟨ε⟩, де ⟨ε⟩ = m₀⟨v<sub>кв</sub>²⟩/2.</p>
+  <p>Жовта риска на стовпчиках — ⅔n₀⟨ε⟩; обидва p збігаються. Тепер натисни <b>«лише вздовж x»</b>: молекули втрачають хаос і летять тільки вздовж осі x. Тиск p<sub>x</sub> стрибає втричі, p<sub>y</sub> = p<sub>z</sub> = 0. Формула з ⅔ існує лише завдяки «молекулярному хаосу».</p>
+  <p class="ref">т. 1, § 14.3, с. 302–304, (14.5), (14.6)</p>
+  <p class="add">Режим «лише вздовж x» — наш експеримент, у книзі його немає.</p>`,
+  f:`<div><i>p</i> = ⅔ (1/<i>l</i>³) Σ <i>m</i><sub>0</sub><i>v<sub>i</sub></i>²/2 &nbsp;(14.5)</div><div><i>p</i> = ⅔ <i>n</i><sub>0</sub> · <i>m</i><sub>0</sub>⟨<i>v</i><sub>кв</sub>²⟩/2 &nbsp;(14.6)</div>`,
+  n:`n₀ = n/V — кількість молекул в одиниці об'єму.`,
+  ctl:[sl("n","N",20,300,1),sl("T","T",.5,4,.05),{btn:"хаос",fn:()=>{ S.mode="chaos"; sims[0].mode="chaos"; }},{btn:"лише вздовж x",fn:()=>{ S.mode="x"; sims[0].setMode("x"); }}],
+  init(){ S.N=120; S.T=2; S.mode="chaos"; sims=[mkCube({L:3,T:2})]; sims[0].add(120,2); },
+  setup(){ const s=sims[0]; if (s.N!==S.N) s.setN(S.N); s.T=S.T; },
+  draw(){ const s=sims[0], n0=s.N/s.V, e=s.meanKE(), pf=2/3*n0*e; bars(s,pf);
+    return `n₀ = ${fmt(n0,2)},  ⟨ε⟩ = ${fmt(e)}\n⅔ n₀⟨ε⟩ = ${fmt(pf,3)}\npₓ = ${fmt(s.p[0],3)}, p_y = ${fmt(s.p[1],3)}, p_z = ${fmt(s.p[2],3)}\nсередній p = ${fmt((s.p[0]+s.p[1]+s.p[2])/3,3)}`; }},
+ {title:"4. Температура: ⟨ε⟩ = 3kT/2",
+  html:`<p>Температура, виміряна в енергетичних одиницях, дорівнює Θ = ⅔⟨ε⟩, тому p = n₀Θ (14.8). У кельвінах Θ = kT, звідси середня кінетична енергія поступального руху <b>⟨ε⟩ = 3kT/2</b> (14.10).</p>
+  <p>Два гази при однаковій T: легкі (m₀) та важкі (4m₀) молекули. <b>Середні енергії однакові</b>, але легкі швидші: v<sub>кв</sub> = √(3kT/m₀). Подвой T: ⟨v²⟩ зросте вдвічі, а v<sub>кв</sub> — у √2.</p>
+  <p class="ref">т. 1, § 14.4, с. 305–309, (14.8)–(14.10)</p>`,
+  f:`<div>Θ = ⅔ <i>m</i><sub>0</sub>⟨<i>v</i><sub>кв</sub>²⟩/2 &nbsp;⟹ &nbsp;<i>p</i> = <i>n</i><sub>0</sub>Θ &nbsp;(14.8)</div><div>Θ = <i>kT</i> &nbsp;(14.9)</div><div><i>m</i><sub>0</sub>⟨<i>v</i><sub>кв</sub>²⟩/2 = (3/2)<i>kT</i> &nbsp;(14.10)</div>`,
+  n:`k — стала Больцмана; тут k = 1.`,
+  ctl:[sl("T","T",.5,4,.05)],
+  init(){ S.T=2; const a=mkCube({L:3,T:2,m:1}), b=mkCube({L:3,T:2,m:4,off:[0,0,5.5]}); a.add(100,2); b.add(100,2); sims=[a,b]; },
+  setup(){ for (const s of sims) s.T=S.T; },
+  draw(){ const [a,b]=sims; const ea=a.meanKE(), eb=b.meanKE(), va=Math.sqrt(2*ea/a.m), vb=Math.sqrt(2*eb/b.m);
+    return `T = ${fmt(S.T)},  3kT/2 = ${fmt(1.5*S.T)}\nлегкі (m₀):   ⟨ε⟩ = ${fmt(ea)},  v_кв = ${fmt(va)}\nважкі (4m₀):  ⟨ε⟩ = ${fmt(eb)},  v_кв = ${fmt(vb)}\nv_кв легких / важких = ${fmt(va/vb)}   (√4 = 2)`; }},
+ {title:"5. Рівновага й температура",
+  html:`<p>Нехай «гарячі» молекули (T = 4) були зліва, «холодні» (T = 1) — справа, і перегородку забрали. Тепер молекули стикаються (діаметр ≈ 0,28), обмінюються енергією, і <b>⟨ε⟩ обох груп вирівнюється</b>. Це <b>релаксація</b> — самочинний перехід до термодинамічної рівноваги.</p>
+  <p>Рівноважне значення — 3kT/2 для середньої T. Саме цим тіла в рівновазі мають однакову <b>температуру</b>, а температура — інтенсивний параметр. Натисни «Перезапустити», щоб повторити.</p>
+  <p class="ref">т. 1, § 14.4, с. 305–307, рис. 14.2 · нульове начало, с. 306</p>
+  <p class="add">Ми беремо зіткнення між молекулами, хоча модель газу їх «враховує лише як події»; на стінки вони не впливають.</p>`,
+  f:`<div>⟨ε⟩<sub>гарячі</sub> → ⟨ε⟩<sub>холодні</sub> → (3/2)<i>kT</i></div><div><i>τ</i><sub>релакс.</sub> — час встановлення рівноваги</div>`,
+  n:`Сумарна енергія зберігається: ізольований газ.`,
+  ts:.4, ctl:[{btn:"Перезапустити",fn:()=>steps[4].init()}],
+  init(){ const s=mkCube({L:3,T:2.5,therm:false,collide:true,colorGroups:true}); s.add(75,4,[0,.5],1); s.add(75,1,[.5,1],0); sims=[s]; S.series=[]; S.nextSample=0; },
+  setup(){ const s=sims[0]; if (s.time>=S.nextSample){ S.series.push([s.time,s.meanKE(1),s.meanKE(0)]); S.nextSample+=.25; if (S.series.length>400) S.series.shift(); } },
+  draw(){ const s=sims[0], h=s.meanKE(1), c=s.meanKE(0), tail=S.series.length?S.series[0][0]:0;
+    const eq=s.meanKE();                           // total energy is conserved, so this is the equilibrium ⟨ε⟩ = 3kT/2
+    seriesPlot({x0:tail,x1:Math.max(tail+12,s.time),y0:0,y1:7,ref:eq});
+    return `час = ${fmt(s.time,1)}\n⟨ε⟩ гарячих = ${fmt(h)}\n⟨ε⟩ холодних = ${fmt(c)}\nрізниця = ${fmt(h-c)}\nрівновага: ⟨ε⟩ = 3kT/2 = ${fmt(eq)}  (T = ${fmt(eq/1.5)})`; }},
+];
+
+/* ---------- gizmo ---------- */
+const AXES=[{n:"x",v:[1,0,0],col:AXCOL[0]},{n:"y",v:[0,1,0],col:AXCOL[1]},{n:"z",v:[0,0,1],col:AXCOL[2]}];
+const GR=34, $=id=>document.getElementById(id);
+function gizmoPos(){ const b=$("formulas").getBoundingClientRect(); return {x:CW-GR-26, y:Math.max(b.bottom,50)+GR+22}; }
+function rotView(v){ const cy=Math.cos(S.yaw), sy=Math.sin(S.yaw), cp=Math.cos(S.pitch), sp=Math.sin(S.pitch);
+  const x1=cy*v[0]+sy*v[2], z1=-sy*v[0]+cy*v[2]; return [x1, cp*v[1]-sp*z1, sp*v[1]+cp*z1]; }
+function gizmoTips(){ const g=gizmoPos(), tips=[];
+  for (const a of AXES) for (const s of [1,-1]){ const r=rotView(a.v.map(c=>c*s)); tips.push({a,s,x:g.x+GR*r[0],y:g.y-GR*r[1],z:r[2]}); } return {g,tips}; }
+function drawGizmo(){
+  const {g,tips}=gizmoTips();
+  ctx.fillStyle="rgba(28,28,28,.6)"; ctx.strokeStyle="#444"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(g.x,g.y,GR+16,0,7); ctx.fill(); ctx.stroke();
+  tips.sort((p,q)=>p.z-q.z);
+  for (const t of tips){ const pos=t.s>0; ctx.globalAlpha=.55+.45*(t.z+1)/2;
+    if (pos){ ctx.strokeStyle=t.a.col; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(g.x,g.y); ctx.lineTo(t.x,t.y); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(t.x,t.y,pos?10:6,0,7); ctx.fillStyle=pos?t.a.col:"rgba(120,120,115,.5)"; ctx.fill();
+    if (pos){ ctx.fillStyle="#1c1c1c"; ctx.font="bold 12px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(t.a.n,t.x,t.y+.5); }
+    ctx.globalAlpha=1; }
+}
+function gizmoHit(px,py){ const {g,tips}=gizmoTips(); let best=null;
+  for (const t of tips) if (Math.hypot(px-t.x,py-t.y)<(t.s>0?13:9) && (best===null||t.z>best.z)) best=t;
+  if (best) return best; return Math.hypot(px-g.x,py-g.y)<GR+16?"home":null; }
+function snapTo(y,p){ S.ty=y; S.tp=p; S.snap=true; }
+
+/* ---------- UI ---------- */
+const dots=$("dots");
+steps.forEach((_,i)=>{ const d=document.createElement("span"); d.onclick=()=>go(i); dots.appendChild(d); });
+function go(i){
+  S.step=Math.max(0,Math.min(steps.length-1,i)); const st=steps[S.step]; st.init();
+  $("ctitle").textContent=st.title; $("ctext").innerHTML=st.html; $("fbody").innerHTML=st.f; $("fnote").textContent=st.n;
+  const c=$("controls"); c.innerHTML="";
+  st.ctl.forEach(s=>{
+    if (s.btn){ const b=document.createElement("button"); b.textContent=s.btn; b.onclick=()=>s.fn(); c.appendChild(b); return; }
+    const l=document.createElement("label"), v=document.createElement("span"), inp=document.createElement("input");
+    inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=s.get();
+    const upd=()=>{ v.textContent=s.fmt(s.get()); }; inp.oninput=()=>{ s.set(+inp.value); upd(); }; l.append(s.label+" ",inp,v); upd(); c.appendChild(l);
+  });
+  [...dots.children].forEach((d,k)=>d.classList.toggle("on",k===S.step));
+  [S.ty,S.tp]=DEFAULT_VIEW[S.step]; S.snap=true;
+  $("count").textContent=(S.step+1)+" / "+steps.length; history.replaceState(null,"","#"+(S.step+1));
+}
+$("trails").onclick=()=>{ S.trails=!S.trails; $("trails").textContent="сліди: "+(S.trails?"так":"ні"); };
+$("prev").onclick=()=>go(S.step-1); $("next").onclick=()=>go(S.step+1);
+addEventListener("keydown",e=>{ if (e.key==="ArrowRight") go(S.step+1); if (e.key==="ArrowLeft") go(S.step-1); });
+if (innerWidth<720) $("formulas").open=false;
+$("ctitle").onclick=()=>$("card").classList.toggle("collapsed");      // the card can be folded to see the whole scene
+if (innerHeight<520) $("card").classList.add("collapsed");
+
+let lx=0,ly=0;
+const pt=e=>{ const r=stage.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; };
+stage.addEventListener("pointerdown",e=>{
+  $("hint").style.display="none"; const h=gizmoHit(...pt(e));
+  if (h==="home"){ snapTo(...DEFAULT_VIEW[S.step]); return; }
+  if (h){ const n=h.a.n, s=h.s; snapTo(n==="y"?S.yaw:n==="x"?-s*Math.PI/2:(s>0?0:Math.PI), n==="y"?s*Math.PI/2:0); return; }
+  S.drag=true; S.snap=false; lx=e.clientX; ly=e.clientY; stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener("pointermove",e=>{
+  if (!S.drag){ stage.style.cursor=gizmoHit(...pt(e))?"pointer":"grab"; return; }
+  S.yaw+=(e.clientX-lx)*.008; S.pitch=Math.max(-1.45,Math.min(1.45,S.pitch+(e.clientY-ly)*.008)); lx=e.clientX; ly=e.clientY;
+});
+stage.addEventListener("pointerup",()=>{ S.drag=false; });
+
+/* ---------- loop ---------- */
+let last=performance.now();
+function loop(t){
+  const real=Math.min(.05,(t-last)/1000); last=t; const st=steps[S.step], dt=real*TSCALE*(st.ts||1); st.setup();
+  const sub=Math.max(1,Math.ceil(dt/.02)); for (let k=0;k<sub;k++) for (const s of sims) s.step(dt/sub); for (const s of sims) s.record();
+  if (S.snap && !S.drag){ const k=Math.min(1,real*7), dy=Math.atan2(Math.sin(S.ty-S.yaw),Math.cos(S.ty-S.yaw));
+    S.yaw+=dy*k; S.pitch+=(S.tp-S.pitch)*k; if (Math.abs(dy)<.002&&Math.abs(S.tp-S.pitch)<.002){ S.yaw=S.ty; S.pitch=S.tp; S.snap=false; } }
+  gl.clearColor(.11,.11,.11,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  const L=sims[0].L, two=sims.length>1, asp=CW/CH, ext=two?L+5.5:L;
+  const dist=Math.max(14,3.1*ext+3)*(asp<1?1/Math.max(.55,asp)*.75+.3:1);
+  const cx=L/2, cz=two?(L+5.5)/2:L/2;
+  const mvp=mul(persp(FOV,asp,.5,200),mul(trans(0,asp<1?2.6:1.2,-dist),mul(rotX(S.pitch),mul(rotY(S.yaw),trans(-cx,-L/2,-cz)))));
+  const projScale=CH*DPR/(2*Math.tan(FOV/2));
+  for (const s of sims) renderSim(s,mvp,projScale,s.m>1?.5:.3);
+  ctx.clearRect(0,0,CW,CH); drawGizmo();
+  $("live").textContent=st.draw()||"";
+  requestAnimationFrame(loop);
+}
+resize(); go((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
