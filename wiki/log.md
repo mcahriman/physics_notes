@@ -96,3 +96,6 @@ Quick view: `grep "^## \[" wiki/log.md | tail -10`
 ## [2026-10-29] backlog | demo of partial derivatives
 - Added to the backlog in CLAUDE.md: an interactive demo of partial derivatives, as a prerequisite for every demo that uses ∂ (rule from the user: no physics with ∂ before a demo of ∂).
 - New demo `demos/electrostatics/grad-div-rot.html` (grad, div, rot, Stokes, rot grad = 0, ∇²φ, nabla; topics 07–09 of electrostatics). Added to `demos/index.html`.
+
+## [2026-10-29] demos | separate math section
+- The math behind the processes (grad, div, rot, nabla, later partial derivatives) gets its own demo section: `demos/math/`, with its own block «Математика до фізики» in `demos/index.html`. `grad-div-rot.html` moved there from `demos/electrostatics/`.

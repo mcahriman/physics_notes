@@ -69,6 +69,6 @@ Repository: github.com/mcahriman/physics_notes (**public**). Never commit the sc
 1. Fill the glossary for electrostatics topics 02–23. Only topic 1 has entries so far.
 2. т. 2 ch. 3–14 (magnetism, induction, waves): mapped in `wiki/sources/kucheruk2.md`, not studied.
 3. т. 1 part I (mechanics) and т. 3 (optics, quantum): mapped only, no syllabus yet.
-4. **Demo: partial derivatives** (`demos/`, single-file like the others). The user's rule: no physics that uses ∂ without a demo of ∂ first. It should show ∂φ/∂x as the slope along one coordinate with the other held fixed, the total differential dφ = φₓdx + φ_ydy, equal mixed partials, and the subscripted form (∂U/∂T)_V from thermodynamics. `demos/electrostatics/grad-div-rot.html` uses partial derivatives without teaching them, so link the new demo as its prerequisite and add it to `demos/index.html`.
+4. **Demo: partial derivatives** (in the separate math section `demos/math/`, single-file like the others). The user's rule: no physics that uses ∂ without a demo of ∂ first. It should show ∂φ/∂x as the slope along one coordinate with the other held fixed, the total differential dφ = φₓdx + φ_ydy, equal mixed partials, and the subscripted form (∂U/∂T)_V from thermodynamics. `demos/math/grad-div-rot.html` uses partial derivatives without teaching them, so link the new demo as its prerequisite and add it to `demos/index.html`.
 
 When the user takes on a backlog item, move it to "Scope: now", update this file and log it.
