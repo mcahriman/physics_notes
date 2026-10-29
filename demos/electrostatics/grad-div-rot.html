@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Градієнт, дивергенція, ротор</title>
+<style>
+  :root { --bg:#1c1c1c; --fg:#e8e6df; --pos:#58c4dd; --neg:#fc6255; --acc:#ffd166; --dim:#8a8a85; --grn:#7bd88f; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui,sans-serif; overflow:hidden; }
+  #stage { position:absolute; inset:0; touch-action:none; cursor:crosshair; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  .panel { background:rgba(28,28,28,.9); border:1px solid #444; border-radius:10px; backdrop-filter:blur(4px); }
+  #card { position:absolute; left:12px; bottom:58px; width:min(470px,calc(100% - 24px)); padding:12px 16px; max-height:52%; overflow:auto; }
+  #card h2 { margin:0 0 4px; font-size:18px; color:var(--acc); cursor:pointer; }
+  #card h2::after { content:" ▾"; color:var(--dim); font-size:13px; }
+  #card.collapsed h2::after { content:" ▸"; }
+  #card.collapsed #ctext { display:none; }
+  #card p { margin:4px 0; }
+  #card .ref { color:var(--dim); font-size:12px; }
+  #card .add { color:var(--dim); font-size:12px; font-style:italic; }
+  #controls { display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; margin-top:8px; }
+  #controls label { display:flex; gap:6px; align-items:center; color:var(--dim); }
+  #controls input[type=range] { width:105px; accent-color:var(--pos); }
+  #controls select { background:#2a2a2a; color:var(--fg); border:1px solid #444; border-radius:6px; padding:3px 6px; font:inherit; }
+  #live { margin-top:6px; font:13px ui-monospace,monospace; color:var(--acc); white-space:pre-line; }
+  button { background:#2a2a2a; color:var(--fg); border:1px solid #444; border-radius:6px; padding:4px 12px; font:inherit; cursor:pointer; white-space:nowrap; }
+  button:hover { border-color:var(--pos); }
+  #formulas { position:absolute; top:10px; right:10px; width:min(310px,calc(100% - 24px)); padding:8px 12px; }
+  #formulas summary { cursor:pointer; font-weight:600; }
+  #formulas .f { font:15px/1.8 "STIX Two Math","Cambria Math",Georgia,serif; }
+  #formulas .f i { color:var(--pos); }
+  #formulas .n { color:var(--dim); font-size:12px; margin-top:4px; }
+  #nav { position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:10px; align-items:center; padding:6px 12px; }
+  #dots { display:flex; gap:7px; }
+  #dots span { width:10px; height:10px; border-radius:50%; background:#555; cursor:pointer; }
+  #dots span.on { background:var(--acc); }
+  #count { color:var(--dim); min-width:36px; text-align:center; }
+  #hint { position:absolute; left:12px; top:8px; width:min(250px,calc(100% - 350px)); color:var(--dim); font-size:12px; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hint"></div>
+<details id="formulas" class="panel" open><summary>Формули</summary><div class="f" id="fbody"></div><div class="n" id="fnote"></div></details>
+<div id="card" class="panel"><h2 id="ctitle"></h2><div id="ctext"></div><div id="controls"></div><div id="live"></div></div>
+<div id="nav" class="panel"><button id="prev">←</button><div id="dots"></div><span id="count"></span><button id="next">→</button></div>
+
+<script>
+"use strict";
+/* Every operator here is computed NUMERICALLY from its definition in the book:
+   grad  — from partial differences (1.61–1.62);
+   div   — flux through a small box / its volume, compared with ∂Aₓ/∂x + ∂A_y/∂y (1.43);
+   rot   — circulation around a small loop / its area, compared with ∂A_y/∂x − ∂Aₓ/∂y (1.47, 1.49);
+   Stokes — circulation around a big loop = sum of circulations of small cells (inner edges cancel).
+   The picture is a 2D section: fields depend on x, y only and A_z = 0 (so rot has only a z-component). */
+const stage=document.getElementById("stage"), cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const $=id=>document.getElementById(id);
+let CW=0,CH=0,DPR=1;
+function resize(){ DPR=Math.min(devicePixelRatio||1,2); CW=stage.clientWidth; CH=stage.clientHeight; cv.width=CW*DPR; cv.height=CH*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener("resize",resize);
+const fmt=(v,n=2)=>(Math.abs(v)<.5*Math.pow(10,-n)?0:v).toFixed(n);
+
+/* ---------- fields ---------- */
+const sq=v=>v*v;
+const PHI={
+  hill:{name:"гора й яма",   f:(x,y)=>1.4*Math.exp(-(sq(x-1.1)+sq(y-.4))/1.1)-1.4*Math.exp(-(sq(x+1.2)+sq(y+.3))/1.1)},
+  dip:{name:"диполь (2 лінійні заряди)", f:(x,y)=>.5*Math.log((sq(x-1.3)+y*y+.12)/(sq(x+1.3)+y*y+.12))},
+  saddle:{name:"сідло",     f:(x,y)=>.3*(x*x-y*y)},
+  bowl:{name:"чаша",        f:(x,y)=>.2*(x*x+y*y)-1.2},
+};
+const VEC={
+  src:{name:"розходження (x, y)",       f:(x,y)=>[.6*x,.6*y]},
+  rot:{name:"обертання (−y, x)",        f:(x,y)=>[-.6*y,.6*x]},
+  shear:{name:"зсув (y, 0)",            f:(x,y)=>[.6*y,0]},
+  uni:{name:"рівномірне (1, 0)",        f:(x,y)=>[.8,0]},
+  sad:{name:"(x, −y)",                  f:(x,y)=>[.6*x,-.6*y]},
+  line:{name:"лінійний заряд (x,y)/r²", f:(x,y)=>{ const r=x*x+y*y+.08; return [x/r,y/r]; }},
+  vort:{name:"вихор (−y,x)/r²",         f:(x,y)=>{ const r=x*x+y*y+.08; return [-y/r,x/r]; }},
+};
+const dh=1e-3;
+const dfx=(f,x,y)=>(f(x+dh,y)-f(x-dh,y))/(2*dh), dfy=(f,x,y)=>(f(x,y+dh)-f(x,y-dh))/(2*dh);
+const gradOf=f=>(x,y)=>[dfx(f,x,y),dfy(f,x,y)];
+const divNum=F=>(x,y)=>{ const g=2e-3; return (F(x+g,y)[0]-F(x-g,y)[0]+F(x,y+g)[1]-F(x,y-g)[1])/(2*g); };
+const rotNum=F=>(x,y)=>{ const g=2e-3; return (F(x+g,y)[1]-F(x-g,y)[1]-F(x,y+g)[0]+F(x,y-g)[0])/(2*g); };
+function flux(F,cx,cy,s,M=24){                          // outward flux through the square, midpoint rule
+  let t=0, d=2*s/M; for (let i=0;i<M;i++){ const u=-s+(i+.5)*d;
+    t+=F(cx+s,cy+u)[0]*d - F(cx-s,cy+u)[0]*d + F(cx+u,cy+s)[1]*d - F(cx+u,cy-s)[1]*d; } return t; }
+function circ(F,cx,cy,s,M=24){                          // counter-clockwise circulation around the square
+  let t=0, d=2*s/M; for (let i=0;i<M;i++){ const u=-s+(i+.5)*d;
+    t+=F(cx+u,cy-s)[0]*d + F(cx+s,cy+u)[1]*d - F(cx+u,cy+s)[0]*d - F(cx-s,cy+u)[1]*d; } return t; }
+
+/* ---------- state + 2D view ---------- */
+const S={step:0, ph:"hill", vf:"rot", x:1.0, y:.7, theta:.8, h:.6, yaw:.8, pitch:.85, s:.8, cells:3, lev:.35, ball:false, trail:[], wheel:0, drag:null, show:0};
+let K=60, OX=0, OY=0;
+function layout(){ K=Math.min(CW/9.4,(CH*.62)/5.8); OX=CW/2; OY=CH*.43; }
+const toS=(x,y)=>({x:OX+x*K, y:OY-y*K}), toW=(px,py)=>({x:(px-OX)/K, y:(OY-py)/K});
+const XR=4.4, YR=2.8;
+
+/* ---------- drawing helpers ---------- */
+function arrow(x0,y0,x1,y1,col,w=2,head=8){ const L=Math.hypot(x1-x0,y1-y0); if (L<2) return; const th=Math.atan2(y1-y0,x1-x0), hh=Math.min(head,L*.6);
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w; ctx.lineCap="round"; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1-Math.cos(th)*hh*.6,y1-Math.sin(th)*hh*.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1-hh*Math.cos(th-.45),y1-hh*Math.sin(th-.45)); ctx.lineTo(x1-hh*Math.cos(th+.45),y1-hh*Math.sin(th+.45)); ctx.closePath(); ctx.fill(); }
+function txt(t,x,y,col="#e8e6df",font="14px system-ui",al="center"){ ctx.font=font; ctx.fillStyle=col; ctx.textAlign=al; ctx.textBaseline="middle"; ctx.fillText(t,x,y); }
+function dot(x,y,r,col,ring){ ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fillStyle=col; ctx.fill(); if (ring){ ctx.strokeStyle=ring; ctx.lineWidth=2; ctx.stroke(); } }
+function vecField(F,step,scale,col="rgba(232,230,223,.55)"){      // arrows on a grid
+  for (let x=-XR+.4;x<=XR;x+=step) for (let y=-YR+.3;y<=YR;y+=step){ const v=F(x,y), m=Math.hypot(v[0],v[1]); if (m<1e-6) continue;
+    const k=Math.min(1,.55*step/(m*scale+1e-9)), a=toS(x,y), b=toS(x+v[0]*scale*Math.min(1,k),y+v[1]*scale*Math.min(1,k)); arrow(a.x,a.y,b.x,b.y,col,1.4,6); } }
+function ramp(v){                                                   // diverging colour for a scalar in [-1,1]
+  const a=Math.min(1,Math.abs(v)), c=v>=0?[252,140,76]:[88,166,255]; return [28+(c[0]-28)*a, 28+(c[1]-28)*a, 30+(c[2]-30)*a]; }
+function plot(o){                                                   // small graph in a corner
+  const w=Math.min(250,CW-24), h=125, x=12, y=o.y||96; ctx.save(); ctx.translate(x,y); ctx.fillStyle="rgba(28,28,28,.92)"; ctx.fillRect(0,0,w,h); ctx.strokeStyle="#444"; ctx.strokeRect(.5,.5,w,h);
+  const X=v=>12+(v-o.x0)/(o.x1-o.x0)*(w-24), Y=v=>h-22-(v-o.y0)/(o.y1-o.y0)*(h-40);
+  ctx.beginPath(); ctx.rect(1,1,w-2,h-2); ctx.clip(); ctx.strokeStyle="#555"; ctx.beginPath(); ctx.moveTo(0,Y(0)); ctx.lineTo(w,Y(0)); ctx.moveTo(X(0),0); ctx.lineTo(X(0),h); ctx.stroke();
+  for (const c of o.curves){ ctx.strokeStyle=c.col; ctx.lineWidth=c.w||2; ctx.setLineDash(c.dash||[]); ctx.beginPath(); for (let i=0;i<=80;i++){ const v=o.x0+(o.x1-o.x0)*i/80, yy=c.f(v); i?ctx.lineTo(X(v),Y(yy)):ctx.moveTo(X(v),Y(yy)); } ctx.stroke(); }
+  ctx.setLineDash([]); if (o.mark!==undefined){ ctx.fillStyle="#fff"; ctx.strokeStyle="#fc6255"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(X(o.mark[0]),Y(o.mark[1]),4.5,0,7); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle="#8a8a85"; ctx.font="12px system-ui"; ctx.textAlign="left"; ctx.fillText(o.title,8,h-7); ctx.restore(); }
+
+/* ---------- scalar-field maps: heat map + contours (marching squares) ---------- */
+const GD=.1, GNX=Math.round(2*XR/GD), GNY=Math.round(2*YR/GD);
+const gridCache={};
+function grid(key,f){ if (gridCache[key]) return gridCache[key]; const g=new Float32Array((GNX+1)*(GNY+1)); for (let j=0;j<=GNY;j++) for (let i=0;i<=GNX;i++) g[j*(GNX+1)+i]=f(-XR+i*GD,-YR+j*GD); return gridCache[key]=g; }
+const off=document.createElement("canvas"); off.width=GNX+1; off.height=GNY+1; const octx=off.getContext("2d");
+function heat(g,vmax,alpha=1){ const im=octx.createImageData(GNX+1,GNY+1);
+  for (let j=0;j<=GNY;j++) for (let i=0;i<=GNX;i++){ const c=ramp(g[j*(GNX+1)+i]/vmax), p=((GNY-j)*(GNX+1)+i)*4; im.data[p]=c[0]; im.data[p+1]=c[1]; im.data[p+2]=c[2]; im.data[p+3]=255*alpha; }
+  octx.putImageData(im,0,0); const a=toS(-XR-GD/2,YR+GD/2), b=toS(XR+GD/2,-YR-GD/2); ctx.imageSmoothingEnabled=true; ctx.drawImage(off,a.x,a.y,b.x-a.x,b.y-a.y); }
+const EDG=[[],[[3,0]],[[0,1]],[[3,1]],[[1,2]],[[3,0],[1,2]],[[0,2]],[[3,2]],[[2,3]],[[0,2]],[[0,1],[2,3]],[[1,2]],[[1,3]],[[0,1]],[[3,0]],[]];
+function contours(g,levels,col){ ctx.lineWidth=1.3;
+  for (const L of levels){ ctx.strokeStyle=Math.abs(L)<1e-9?"rgba(255,209,102,.95)":col; ctx.beginPath();
+    for (let j=0;j<GNY;j++) for (let i=0;i<GNX;i++){ const a=g[j*(GNX+1)+i], b=g[j*(GNX+1)+i+1], c=g[(j+1)*(GNX+1)+i+1], d=g[(j+1)*(GNX+1)+i];
+      const idx=(a>L)*1+(b>L)*2+(c>L)*4+(d>L)*8; if (idx===0||idx===15) continue; const x0=-XR+i*GD, y0=-YR+j*GD;
+      const pt=e=>e===0?[x0+(L-a)/(b-a)*GD,y0]:e===1?[x0+GD,y0+(L-b)/(c-b)*GD]:e===2?[x0+(L-d)/(c-d)*GD,y0+GD]:[x0,y0+(L-a)/(d-a)*GD];
+      for (const [e1,e2] of EDG[idx]){ const p=pt(e1), q=pt(e2), s1=toS(p[0],p[1]), s2=toS(q[0],q[1]); ctx.moveTo(s1.x,s1.y); ctx.lineTo(s2.x,s2.y); } }
+    ctx.stroke(); } }
+const levelsFor=(sp,vmax)=>{ const o=[]; for (let L=-Math.floor(vmax/sp)*sp;L<=vmax+1e-9;L+=sp) o.push(Math.abs(L)<1e-9?0:L); return o; };
+
+/* ---------- step 1: φ as a relief (own orthographic 3D) ---------- */
+const RX=3.6, RY=2.4, ZB=-1.75, ZC=1.6;
+const clampZ=z=>Math.max(-ZC,Math.min(ZC,z));
+function P3(x,y,z){ const c=Math.cos(S.yaw), s=Math.sin(S.yaw), X=x*c-y*s, Y=x*s+y*c, cp=Math.cos(S.pitch), sp=Math.sin(S.pitch), k=Math.min(CW/8.6,(CH*.5)/(4.4));
+  return {x:CW/2+k*X, y:CH*.40-k*(z*cp+Y*sp)*1.0, d:Y*cp-z*sp, k}; }
+function unP3(px,py,z){ const k=P3(0,0,0).k, X=(px-CW/2)/k, cp=Math.cos(S.pitch), sp=Math.sin(S.pitch), Y=(-(py-CH*.40)/k-z*cp)/sp, c=Math.cos(S.yaw), s=Math.sin(S.yaw); return {x:X*c+Y*s, y:-X*s+Y*c}; }
+function drawRelief(){
+  const f=PHI[S.ph].f, NX=36, NY=24, quads=[];
+  for (let j=0;j<NY;j++) for (let i=0;i<NX;i++){ const xs=[-RX+i*2*RX/NX,-RX+(i+1)*2*RX/NX], ys=[-RY+j*2*RY/NY,-RY+(j+1)*2*RY/NY], zz=[[f(xs[0],ys[0]),f(xs[1],ys[0])],[f(xs[0],ys[1]),f(xs[1],ys[1])]];
+    const pts=[[0,0],[1,0],[1,1],[0,1]].map(([a,b])=>P3(xs[a],ys[b],clampZ(zz[b][a]))); quads.push({pts,d:(pts[0].d+pts[1].d+pts[2].d+pts[3].d)/4,z:(zz[0][0]+zz[1][1])/2}); }
+  quads.sort((a,b)=>b.d-a.d);
+  const base=[[-RX,-RY],[RX,-RY],[RX,RY],[-RX,RY]].map(([x,y])=>P3(x,y,ZB)); ctx.fillStyle="rgba(255,255,255,.04)"; ctx.strokeStyle="#555"; ctx.lineWidth=1; ctx.beginPath(); base.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath(); ctx.fill(); ctx.stroke();
+  for (const q of quads){ const t=Math.max(0,Math.min(1,(q.z+ZC)/(2*ZC))), c=ramp(2*t-1); ctx.fillStyle=`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`; ctx.strokeStyle="rgba(0,0,0,.28)"; ctx.lineWidth=.6;
+    ctx.beginPath(); q.pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  // marker, its foot on the base plane, direction line, gradient and E
+  const z0=clampZ(f(S.x,S.y)), m=P3(S.x,S.y,z0), foot=P3(S.x,S.y,ZB), g=gradOf(f)(S.x,S.y), gl=Math.hypot(g[0],g[1]);
+  ctx.setLineDash([4,4]); ctx.strokeStyle="#aaa"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(m.x,m.y); ctx.lineTo(foot.x,foot.y); ctx.stroke(); ctx.setLineDash([]);
+  const dir=[Math.cos(S.theta),Math.sin(S.theta)], A=P3(S.x-1.8*dir[0],S.y-1.8*dir[1],ZB), B=P3(S.x+1.8*dir[0],S.y+1.8*dir[1],ZB); ctx.strokeStyle="rgba(255,255,255,.7)"; ctx.setLineDash([6,5]); ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke(); ctx.setLineDash([]);
+  const gs=Math.min(2.4,gl*1.6), tipG=P3(S.x+g[0]/(gl||1)*gs,S.y+g[1]/(gl||1)*gs,ZB), tipE=P3(S.x-g[0]/(gl||1)*gs,S.y-g[1]/(gl||1)*gs,ZB);
+  arrow(foot.x,foot.y,tipG.x,tipG.y,"#ffd166",3,10); arrow(foot.x,foot.y,tipE.x,tipE.y,"#58c4dd",3,10);
+  txt("grad φ",tipG.x,tipG.y-12,"#ffd166","italic 14px Georgia,serif"); txt("E = −grad φ",tipE.x,tipE.y+13,"#58c4dd","italic 14px Georgia,serif");
+  if (S.trail.length>1){ ctx.strokeStyle="#fc6255"; ctx.lineWidth=2; ctx.beginPath(); S.trail.forEach(([x,y],i)=>{ const p=P3(x,y,clampZ(f(x,y))); i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); }); ctx.stroke(); }
+  dot(m.x,m.y,7,"#fc6255","#fff");
+  // insets: profile along the direction + tangent/secant, and dφ/ds against θ
+  const s0=f(S.x,S.y), ds=gl*Math.cos(S.theta-Math.atan2(g[1],g[0])), prof=s=>f(S.x+s*dir[0],S.y+s*dir[1]), sec=(prof(S.h)-s0)/S.h;
+  plot({title:"φ вздовж пунктиру (s — відстань)",x0:-1.8,x1:1.8,y0:s0-1.4,y1:s0+1.4,curves:[{f:prof,col:"#58c4dd"},{f:s=>s0+ds*s,col:"#ffd166",dash:[5,4],w:1.5},{f:s=>s0+sec*s,col:"#fc8c4c",dash:[2,3],w:1.5}],mark:[0,s0],y:96});
+  plot({title:"dφ/ds залежно від кута θ",x0:-Math.PI,x1:Math.PI,y0:-Math.max(.5,gl*1.15),y1:Math.max(.5,gl*1.15),curves:[{f:t=>gl*Math.cos(t-Math.atan2(g[1],g[0])),col:"#7bd88f"}],mark:[norm(S.theta),ds],y:96+125+8});
+  return {g,gl,ds,sec,s0};
+}
+const norm=a=>Math.atan2(Math.sin(a),Math.cos(a));
+
+/* ---------- steps ---------- */
+const selPhi={sel:Object.keys(PHI).map(k=>[k,PHI[k].name]),get:()=>S.ph,set:v=>{ S.ph=v; S.trail=[]; S.ball=false; }};
+const selVec=(keys)=>({sel:keys.map(k=>[k,VEC[k].name]),get:()=>S.vf,set:v=>{ S.vf=v; }});
+const sl=(label,k,min,max,step,fm=v=>fmt(v))=>({label,min,max,step,get:()=>S[k],set:v=>{S[k]=v;},fmt:fm});
+const steps=[
+ {title:"1. Градієнт: похідна за напрямом і рельєф",
+  html:`<p>Нехай φ(x, y) — висота рельєфу. Біля точки (червона кулька) φ змінюється вздовж напряму s зі швидкістю <b>dφ/ds</b>. Це нахил дотичної (жовтий пунктир на малому графіку). Оранжевий пунктир — січна на кроці h: зменшуй h, і січна стає дотичною.</p>
+  <p>Крути напрям θ: нахил dφ/ds = |grad φ|·cos(кут між s і grad φ). Він найбільший, коли s збігається з <b>grad φ</b> — напрямом найшвидшого зростання. Складові градієнта — частинні похідні ∂φ/∂x, ∂φ/∂y. А <b>E = −grad φ</b> дивиться «вниз схилом»: так покотиться кулька.</p>
+  <p class="ref">т. 2, § 1.11, с. 51–52, (1.61)–(1.62)</p>`,
+  f:`<div>grad φ = (∂φ/∂x) <b>i</b> + (∂φ/∂y) <b>j</b> + (∂φ/∂z) <b>k</b></div><div><b>E</b> = −grad φ &nbsp;(1.62)</div><div>dφ/d<i>s</i> = grad φ · <b>s</b> = |grad φ| cos α</div>`,
+  n:`Тут 2D: φ залежить від x, y. Мінус — E спрямоване туди, де φ спадає.`,
+  ctl:[selPhi,sl("напрям θ","theta",-3.14,3.14,.02,v=>fmt(v*180/Math.PI,0)+"°"),sl("крок h","h",.02,1.2,.02),{btn:"Покотити кульку",fn:()=>{ S.ball=!S.ball; S.trail=[[S.x,S.y]]; }}],
+  init(){ S.x=1.0; S.y=.7; S.theta=.8; S.h=.6; S.ball=false; S.trail=[]; S.yaw=.8; S.pitch=.85; },
+  tick(dt){ if (!S.ball) return; const g=gradOf(PHI[S.ph].f)(S.x,S.y), m=Math.hypot(g[0],g[1]); if (m<.02){ S.ball=false; return; }
+    const v=Math.min(1.6,m*2.2); S.x-=g[0]/m*v*dt; S.y-=g[1]/m*v*dt; S.x=Math.max(-RX+.1,Math.min(RX-.1,S.x)); S.y=Math.max(-RY+.1,Math.min(RY-.1,S.y)); S.trail.push([S.x,S.y]); if (S.trail.length>400) S.trail.shift(); },
+  draw(){ const r=drawRelief(); const f=PHI[S.ph].f, px=dfx(f,S.x,S.y), py=dfy(f,S.x,S.y);
+    return `точка (${fmt(S.x)}, ${fmt(S.y)}),  φ = ${fmt(r.s0)}\n∂φ/∂x = ${fmt(px)},  ∂φ/∂y = ${fmt(py)}\ngrad φ = (${fmt(px)}, ${fmt(py)}),  |grad φ| = ${fmt(r.gl)}\nE = −grad φ = (${fmt(-px)}, ${fmt(-py)})\ndφ/ds (θ=${fmt(S.theta*180/Math.PI,0)}°) = ${fmt(r.ds)};  січна на h=${fmt(S.h)}: ${fmt(r.sec)}`; }},
+ {title:"2. Еквіпотенціалі й густина ліній",
+  html:`<p>Вигляд зверху: кольори — φ (помаранчевий більше, синій менше), тонкі лінії — <b>еквіпотенціалі</b> (φ = const), стрілки — E = −grad φ. Градієнт завжди <b>перпендикулярний</b> до еквіпотенціалі: вздовж лінії φ не змінюється, тож dφ/ds = 0.</p>
+  <p>Подивись на густину ліній: де еквіпотенціалі <b>густі</b>, φ змінюється швидко, |grad φ| велике і E сильне; де розріджені — слабке. Перетягни точку: стрілка E показує, що вона ⟂ лінії, що проходить через точку.</p>
+  <p class="ref">т. 2, § 1.11, с. 51–52, (1.62)</p>`,
+  f:`<div><b>E</b> = −grad φ &nbsp;(1.62)</div><div><b>E</b> ⟂ еквіпотенціалі</div><div>|<b>E</b>| = |∂φ/∂<i>n</i>| ≈ Δφ/Δ<i>n</i></div>`,
+  n:`Крок між лініями Δφ однаковий: чим ближче лінії, тим більше E.`,
+  ctl:[selPhi,sl("крок Δφ","lev",.1,.6,.05),{btn:"Стрілки E: так/ні",fn:()=>{ S.show=1-S.show; }}],
+  init(){ S.x=.3; S.y=1.0; S.show=0; },
+  draw(){ const f=PHI[S.ph].f, g=grid("phi_"+S.ph,f); heat(g,1.5,.8); contours(g,levelsFor(S.lev,1.6),"rgba(232,230,223,.55)");
+    if (!S.show) vecField(gradOf((x,y)=>-f(x,y)),.7,.5,"rgba(255,255,255,.7)");
+    const gd=gradOf(f)(S.x,S.y), m=Math.hypot(gd[0],gd[1]), p=toS(S.x,S.y), sc=Math.min(1.4,m*1.2)/(m||1);
+    arrow(p.x,p.y,p.x-gd[0]*sc*K,p.y+gd[1]*sc*K,"#58c4dd",3.5,11); const t=[-gd[1]/(m||1),gd[0]/(m||1)]; ctx.setLineDash([5,4]); ctx.strokeStyle="#ffd166"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(p.x-t[0]*K,p.y+t[1]*K); ctx.lineTo(p.x+t[0]*K,p.y-t[1]*K); ctx.stroke(); ctx.setLineDash([]);
+    dot(p.x,p.y,6,"#fff","#fc6255");
+    return `точка (${fmt(S.x)}, ${fmt(S.y)})\nφ = ${fmt(f(S.x,S.y))}\n|E| = |grad φ| = ${fmt(m)}\nвздовж еквіпотенціалі (жовта): dφ/ds = ${fmt(gd[0]*t[0]+gd[1]*t[1],3)}  (= 0)`; }},
+ {title:"3. Дивергенція: потік через малу коробку",
+  html:`<p><b>Дивергенція</b> векторного поля в точці — це границя потоку через замкнену поверхню, поділеного на об'єм, коли об'єм стягується в точку: div A = lim ∮Aₙ dS / V. Тут «об'єм» — квадрат (2D).</p>
+  <p>Обери поле й постав коробку. Зелені стрілки — потік назовні, червоні — всередину. Число <b>Φ/площа</b> порівняй з формулою ∂Aₓ/∂x + ∂A_y/∂y: вони збігаються, і ще точніше при меншій коробці. Для A = (x, y) дивергенція всюди 2·0,6; для (x, −y) — 0; для «лінійного заряду» — 0 усюди, крім початку координат (там джерело).</p>
+  <p class="ref">т. 2, § 1.8, с. 41–43, (1.38), (1.42), (1.43)</p>`,
+  f:`<div>div <b>A</b> = lim<sub><i>V</i>→0</sub> ∮ <i>A<sub>n</sub></i> d<i>S</i> / <i>V</i></div><div>div <b>A</b> = ∂<i>A<sub>x</sub></i>/∂<i>x</i> + ∂<i>A<sub>y</sub></i>/∂<i>y</i> + ∂<i>A<sub>z</sub></i>/∂<i>z</i> &nbsp;(1.43)</div><div>div <b>E</b> = ρ/ε<sub>0</sub> &nbsp;(1.42)</div>`,
+  n:`У 2D-перерізі A_z = 0 і ∂/∂z = 0.`,
+  ctl:[selVec(["src","sad","uni","rot","line"]),sl("півсторона s","s",.08,1.4,.02)],
+  init(){ S.vf="src"; S.x=1.0; S.y=.5; S.s=.8; },
+  draw(){ const F=VEC[S.vf].f; vecField(F,.7,.5); const x=S.x,y=S.y,s=S.s,a=toS(x-s,y+s),b=toS(x+s,y-s);
+    ctx.fillStyle="rgba(255,209,102,.07)"; ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y); ctx.strokeStyle="#ffd166"; ctx.lineWidth=2; ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);
+    const M=5; for (let i=0;i<M;i++){ const u=-s+(i+.5)*2*s/M; for (const [px,py,nx,ny] of [[x+s,y+u,1,0],[x-s,y+u,-1,0],[x+u,y+s,0,1],[x+u,y-s,0,-1]]){ const v=F(px,py), fl=v[0]*nx+v[1]*ny, p=toS(px,py), L=Math.max(-1,Math.min(1,fl*1.2))*22;
+        arrow(p.x,p.y,p.x+nx*L*Math.sign(1)*(fl>=0?1:-1)*(fl>=0?1:1),p.y-ny*L,fl>=0?"#7bd88f":"#fc6255",2.4,7); } }
+    dot(toS(x,y).x,toS(x,y).y,5,"#fff","#fc6255");
+    const Phi=flux(F,x,y,s), area=4*s*s, d=divNum(F)(x,y); return `потік Φ = ∮Aₙ dS = ${fmt(Phi,3)},  площа = ${fmt(area,3)}\nΦ / площа = ${fmt(Phi/area,3)}\n∂Aₓ/∂x + ∂A_y/∂y = div A = ${fmt(d,3)}\n`+(Math.abs(d)<.02?"div A = 0: скільки входить, стільки й виходить":d>0?"div A > 0: тут джерело (лінії починаються)":"div A < 0: тут стік (лінії закінчуються)"); }},
+ {title:"4. Ротор: циркуляція по малому контуру",
+  html:`<p><b>Ротор</b> міряє «завихрення» поля. Його проєкція на нормаль n — це границя циркуляції по малому контуру, поділеної на площу, яку він огинає: rot<sub>n</sub> A = lim ∮A dl / ΔS. Напрям обходу — за правилом <b>правого гвинта</b> (проти годинникової → rot<sub>z</sub> &gt; 0).</p>
+  <p>Поле «обертання» (−y, x) має rot<sub>z</sub> = 2·0,6 усюди: вітряк у центрі крутиться. Зсув (y, 0) теж вихровий, але в протилежний бік. Рівномірне поле й поле заряду (x,y)/r² — безвихрові: циркуляція нуль. Порівняй <b>циркуляцію/площа</b> з ∂A_y/∂x − ∂Aₓ/∂y.</p>
+  <p class="ref">т. 2, § 1.10, с. 45–47, (1.46), (1.47), (1.49)</p>`,
+  f:`<div>rot<sub><i>n</i></sub> <b>A</b> = lim<sub>Δ<i>S</i>→0</sub> ∮ <b>A</b> d<b>l</b> / Δ<i>S</i> &nbsp;(1.47)</div><div>(rot <b>A</b>)<sub><i>z</i></sub> = ∂<i>A<sub>y</sub></i>/∂<i>x</i> − ∂<i>A<sub>x</sub></i>/∂<i>y</i> &nbsp;(1.49)</div><div>∮ <b>E</b> d<b>l</b> = 0 &nbsp;(1.46)</div>`,
+  n:`Інші складові ротора вимагають A_z і ∂/∂z; в 2D-перерізі лишається тільки z.`,
+  ctl:[selVec(["rot","shear","uni","line","vort"]),sl("півсторона s","s",.08,1.4,.02)],
+  init(){ S.vf="rot"; S.x=1.0; S.y=.5; S.s=.8; S.wheel=0; },
+  tick(dt){ const r=rotNum(VEC[S.vf].f)(S.x,S.y); S.wheel+=r*dt*1.2; },
+  draw(){ const F=VEC[S.vf].f; vecField(F,.7,.5); const x=S.x,y=S.y,s=S.s,a=toS(x-s,y+s),b=toS(x+s,y-s);
+    ctx.fillStyle="rgba(255,209,102,.07)"; ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y); ctx.strokeStyle="#ffd166"; ctx.lineWidth=2; ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);
+    const M=4; for (let i=0;i<M;i++){ const u=-s+(i+.5)*2*s/M; for (const [px,py,tx,ty] of [[x+u,y-s,1,0],[x+s,y+u,0,1],[x+u,y+s,-1,0],[x-s,y+u,0,-1]]){ const v=F(px,py), c=v[0]*tx+v[1]*ty, p=toS(px,py), L=Math.max(-1,Math.min(1,c*1.2))*20;
+        arrow(p.x,p.y,p.x+tx*L,p.y-ty*L,c>=0?"#7bd88f":"#fc6255",2.4,7); } }
+    const c=toS(x,y); ctx.save(); ctx.translate(c.x,c.y); ctx.rotate(-S.wheel); ctx.strokeStyle="#fff"; ctx.lineWidth=2.5; for (let k=0;k<4;k++){ ctx.rotate(Math.PI/2); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.min(.45,s*.8)*K,0); ctx.stroke(); } ctx.restore(); dot(c.x,c.y,4,"#fc6255");
+    const C=circ(F,x,y,s), area=4*s*s, r=rotNum(F)(x,y); return `циркуляція ∮A dl = ${fmt(C,3)},  площа = ${fmt(area,3)}\nциркуляція / площа = ${fmt(C/area,3)}\n∂A_y/∂x − ∂Aₓ/∂y = rot_z A = ${fmt(r,3)}\n`+(Math.abs(r)<.02?"rot A = 0: вітряк не крутиться (потенціальне поле)":r>0?"rot_z > 0: проти годинникової, вітряк крутиться":"rot_z < 0: за годинниковою"); }},
+ {title:"5. Теорема Стокса: малі контури складаються у великий",
+  html:`<p>Розріж велику область на N×N клітинок. Циркуляція по кожній клітинці ≈ rot<sub>z</sub>·(її площа). У сумі <b>внутрішні ребра скорочуються</b>: кожне пройдено двічі в протилежних напрямках. Лишаються тільки зовнішні ребра, тобто циркуляція по великому контуру.</p>
+  <p>Тому <b>∮A dl = ∫ rot A dS</b>: циркуляція по контуру дорівнює потоку ротора крізь будь-яку поверхню, натягнуту на цей контур. Збільшуй N: сума по клітинках точно збігається з циркуляцією по контуру. Для потенціального поля обидва числа нулі. Звідси <b>rot E = 0</b> (1.51).</p>
+  <p class="ref">т. 2, § 1.10, с. 47–48, (1.50), (1.51)</p>`,
+  f:`<div>∮<sub><i>L</i></sub> <b>A</b> d<b>l</b> = ∫<sub><i>S</i></sub> rot <b>A</b> d<b>S</b></div><div>∮ <b>E</b> d<b>l</b> = 0 ⟹ rot <b>E</b> = 0 &nbsp;(1.51)</div>`,
+  n:`Внутрішні ребра двох сусідніх клітинок мають протилежні напрями.`,
+  ctl:[selVec(["rot","shear","vort","line","uni"]),sl("N × N клітинок","cells",1,10,1,v=>v+"×"+v),sl("півсторона s","s",.6,2.2,.05)],
+  init(){ S.vf="vort"; S.x=.3; S.y=.2; S.s=1.6; S.cells=3; },
+  draw(){ const F=VEC[S.vf].f; vecField(F,.8,.5,"rgba(232,230,223,.35)"); const x=S.x,y=S.y,s=S.s,N=S.cells,d=2*s/N; let sum=0, sumRot=0;
+    for (let i=0;i<N;i++) for (let j=0;j<N;j++){ const cx=x-s+(i+.5)*d, cy=y-s+(j+.5)*d, c=circ(F,cx,cy,d/2,10); sum+=c; { const Q=6, rn=rotNum(F); let r=0; for (let a=0;a<Q;a++) for (let b=0;b<Q;b++) r+=rn(cx-d/2+(a+.5)*d/Q,cy-d/2+(b+.5)*d/Q); sumRot+=r/(Q*Q)*d*d; }
+      const a=toS(cx-d/2,cy+d/2), b=toS(cx+d/2,cy-d/2), t=Math.max(-1,Math.min(1,c/(d*d)/1.6)); ctx.fillStyle=t>=0?`rgba(252,140,76,${.12+.45*t})`:`rgba(88,166,255,${.12-.45*t})`; ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);
+      ctx.strokeStyle="rgba(255,255,255,.28)"; ctx.lineWidth=1; ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);
+      const p=toS(cx,cy), r=Math.min(12,d*K*.3); if (N<=6) { ctx.strokeStyle=c>=0?"#fc8c4c":"#58a6ff"; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(p.x,p.y,r,.3,5.4,c<0); ctx.stroke(); } }
+    const a=toS(x-s,y+s), b=toS(x+s,y-s); ctx.strokeStyle="#ffd166"; ctx.lineWidth=3; ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);
+    const big=circ(F,x,y,s,48); return `циркуляція по великому контуру ∮A dl = ${fmt(big,4)}\nсума циркуляцій ${N*N} клітинок = ${fmt(sum,4)}\n∫ rot A dS (сума rot·ΔS) = ${fmt(sumRot,4)}\nрізниця «контур − клітинки» = ${fmt(big-sum,5)}`; }},
+ {title:"6. rot grad φ ≡ 0",
+  html:`<p>Візьмемо поле, яке є градієнтом: v = grad φ. Його ротор — різниця мішаних похідних: (rot v)<sub>z</sub> = ∂²φ/∂x∂y − ∂²φ/∂y∂x. Для гладкої φ вони <b>рівні</b>, тож <b>rot grad φ ≡ 0</b> для будь-якої φ.</p>
+  <p>Інакше: циркуляція градієнта по замкненому контуру — це φ(кінець) − φ(початок) = 0. Постав контур куди завгодно: ∮ grad φ·dl = 0. А ось вихрове поле (−y, x) має ненульову циркуляцію, тож для нього потенціалу φ не існує. Це пояснює, чому <b>E = −grad φ автоматично дає rot E = 0</b>.</p>
+  <p class="ref">т. 2, § 1.11, с. 53; § 1.10, с. 47–48, (1.51)</p>`,
+  f:`<div>rot grad φ ≡ 0</div><div>∮ grad φ · d<b>l</b> = φ<sub>кін</sub> − φ<sub>поч</sub> = 0</div><div><b>E</b> = −grad φ ⟹ rot <b>E</b> = 0</div>`,
+  n:`Мішані похідні гладкої функції рівні: ∂²φ/∂x∂y = ∂²φ/∂y∂x.`,
+  ctl:[selPhi,sl("півсторона s","s",.2,2,.05),{btn:"Поле: grad φ / вихор",fn:()=>{ S.show=1-S.show; }}],
+  init(){ S.ph="hill"; S.x=.2; S.y=.1; S.s=1.1; S.show=0; },
+  draw(){ const f=PHI[S.ph].f, G=gradOf(f), F=S.show?VEC.rot.f:G; const g=grid("phi_"+S.ph,f); heat(g,1.5,.35); contours(g,levelsFor(.35,1.6),"rgba(232,230,223,.25)"); vecField(F,.7,S.show?.5:.7,S.show?"rgba(252,140,76,.75)":"rgba(255,209,102,.8)");
+    const x=S.x,y=S.y,s=S.s,a=toS(x-s,y+s),b=toS(x+s,y-s); ctx.strokeStyle="#fff"; ctx.lineWidth=2.5; ctx.strokeRect(a.x,a.y,b.x-a.x,b.y-a.y);
+    const M=4; for (let i=0;i<M;i++){ const u=-s+(i+.5)*2*s/M; for (const [px,py,tx,ty] of [[x+u,y-s,1,0],[x+s,y+u,0,1],[x+u,y+s,-1,0],[x-s,y+u,0,-1]]){ const v=F(px,py), c=v[0]*tx+v[1]*ty, p=toS(px,py), L=Math.max(-1,Math.min(1,c*.9))*18; arrow(p.x,p.y,p.x+tx*L,p.y-ty*L,c>=0?"#7bd88f":"#fc6255",2.2,7); } }
+    const C=circ(F,x,y,s,64), h=.02, mxy=(f(x+h,y+h)-f(x+h,y-h)-f(x-h,y+h)+f(x-h,y-h))/(4*h*h);
+    return `поле: ${S.show?"вихор (−y, x), не градієнт":"grad φ, φ — "+PHI[S.ph].name}\nциркуляція по білому контуру = ${fmt(C,5)}\n`+(S.show?`для вихору ∮ = 2·0,6·площа = ${fmt(1.2*4*s*s,3)} ≠ 0`:`∂²φ/∂x∂y = ∂²φ/∂y∂x = ${fmt(mxy,4)} (мішані похідні рівні)\n(rot grad φ)_z = ${fmt(rotNum(G)(x,y),4)}  ≈ 0`); }},
+ {title:"7. div grad φ = ∇²φ: рівняння Пуассона",
+  html:`<p>Тепер навпаки: візьмемо дивергенцію від градієнта. div grad φ = ∂²φ/∂x² + ∂²φ/∂y² + ∂²φ/∂z² ≡ ∇²φ — <b>лапласіан</b>. Підставимо E = −grad φ у div E = ρ/ε₀: <b>∇²φ = −ρ/ε₀</b> — рівняння Пуассона (1.63). Там, де ρ = 0, виходить рівняння Лапласа ∇²φ = 0 (1.64).</p>
+  <p>Тут φ — потенціал двох лінійних зарядів (+ ліворуч, − праворуч). Карта показує <b>−∇²φ = ρ/ε₀</b>, обчислене із самої φ чисельно: ненульове лише на зарядах, а між ними φ лишається «гладкою» (∇²φ = 0). Перетягни точку: div E, взята від градієнта, збігається з −∇²φ.</p>
+  <p class="ref">т. 2, § 1.11, с. 52–53, (1.63), (1.64)</p>`,
+  f:`<div>div grad φ = ∇²φ = ∂²φ/∂<i>x</i>² + ∂²φ/∂<i>y</i>² + ∂²φ/∂<i>z</i>²</div><div>∇²φ = −ρ/ε<sub>0</sub> &nbsp;(1.63)</div><div>∇²φ = 0 при ρ = 0 &nbsp;(1.64)</div>`,
+  n:`Порівняй з div E = ρ/ε₀ (1.42): E = −grad φ ⟹ div E = −∇²φ.`,
+  ctl:[{btn:"Стрілки E: так/ні",fn:()=>{ S.show=1-S.show; }}],
+  init(){ S.ph="dip"; S.x=-.8; S.y=.5; S.show=0; },
+  draw(){ const f=PHI.dip.f, lg=(x,y)=>{ const g=.05; return (f(x+g,y)+f(x-g,y)+f(x,y+g)+f(x,y-g)-4*f(x,y))/(g*g); };
+    const rho=grid("rho_dip",(x,y)=>-lg(x,y)), mx=Math.max(...rho.map(Math.abs))||1; heat(rho,mx*.45,.9); const gphi=grid("phi_dip",f); contours(gphi,levelsFor(.3,1.6),"rgba(232,230,223,.3)");
+    if (!S.show) vecField(gradOf((x,y)=>-f(x,y)),.7,.5,"rgba(255,255,255,.6)");
+    for (const [cx,cy,q] of [[-1.3,0,"+"],[1.3,0,"−"]]){ const p=toS(cx,cy); txt(q,p.x,p.y,"#e8e6df","bold 20px system-ui"); }
+    const p=toS(S.x,S.y); dot(p.x,p.y,6,"#fff","#fc6255"); const E=gradOf((x,y)=>-f(x,y)), dE=divNum(E)(S.x,S.y), ml=-lg(S.x,S.y);
+    return `точка (${fmt(S.x)}, ${fmt(S.y)})\ndiv E = div(−grad φ) = ${fmt(dE,3)}\n−∇²φ = −(∂²φ/∂x² + ∂²φ/∂y²) = ${fmt(ml,3)}\nρ/ε₀ = ${fmt(ml,3)}  (збігаються)\n`+(Math.abs(ml)<.05?"ρ = 0: рівняння Лапласа ∇²φ = 0":ml>0?"ρ > 0: тут додатний заряд":"ρ < 0: тут від'ємний заряд"); }},
+ {title:"8. Набла ∇: один символ, три дії",
+  html:`<p>Усі три операції записують одним символом — <b>оператором набла</b> ∇ = (∂/∂x, ∂/∂y, ∂/∂z). Це «вектор», складений із похідних: сам по собі він нічого не рахує, а <b>діє на те, що стоїть праворуч</b>.</p>
+  <p>Множення на скаляр дає <b>градієнт</b>: ∇φ. Скалярний добуток із вектором — <b>дивергенцію</b>: ∇·A. Векторний добуток — <b>ротор</b>: ∇×A. Двічі застосований: ∇·∇ = ∇² — лапласіан. Обери операцію, перетягни точку й дивись, як вона розписується через частинні похідні та які там числа.</p>
+  <p class="ref">т. 2, § 1.8, 1.10, 1.11 (книга пише grad, div, rot і ∇² у (1.63))</p>
+  <p class="add">Запис ∇φ, ∇·A, ∇×A — сучасний, не з книги (див. Доповнення на сторінці теми 9).</p>`,
+  f:`<div>∇ = <b>i</b> ∂/∂<i>x</i> + <b>j</b> ∂/∂<i>y</i> + <b>k</b> ∂/∂<i>z</i></div><div>grad φ = ∇φ, &nbsp;div <b>A</b> = ∇·<b>A</b>, &nbsp;rot <b>A</b> = ∇×<b>A</b></div><div>∇² = ∇·∇ &nbsp;(1.63), &nbsp;∇×∇φ ≡ 0</div>`,
+  n:`rot A — визначник: рядки (i j k), (∂/∂x ∂/∂y ∂/∂z), (A_x A_y A_z) — це (1.49).`,
+  ctl:[{sel:[["grad","∇φ — градієнт"],["div","∇·A — дивергенція"],["rot","∇×A — ротор"],["lap","∇·∇φ = ∇²φ — лапласіан"],["rg","∇×(∇φ) — ротор градієнта"]],get:()=>S.op,set:v=>{ S.op=v; }},selPhi,selVec(["src","rot","shear","sad","uni","line","vort"])],
+  init(){ S.op="grad"; S.ph="hill"; S.vf="rot"; S.x=.9; S.y=.5; },
+  draw(){
+    const op=S.op, usesPhi=op==="grad"||op==="lap"||op==="rg", f=PHI[S.ph].f, F=VEC[S.vf].f, x=S.x, y=S.y;
+    if (usesPhi){ const g=grid("phi_"+S.ph,f); heat(g,1.5,.6); contours(g,levelsFor(.35,1.6),"rgba(232,230,223,.35)"); vecField(gradOf(f),.7,.7,"rgba(255,209,102,.75)"); } else vecField(F,.7,.5,"rgba(232,230,223,.7)");
+    const p=toS(x,y); dot(p.x,p.y,6,"#fff","#fc6255");
+    const Ax=(a,b)=>F(a,b)[0], Ay=(a,b)=>F(a,b)[1], hh=.02;
+    const pxx=(f(x+hh,y)-2*f(x,y)+f(x-hh,y))/(hh*hh), pyy=(f(x,y+hh)-2*f(x,y)+f(x,y-hh))/(hh*hh), pxy=(f(x+hh,y+hh)-f(x+hh,y-hh)-f(x-hh,y+hh)+f(x-hh,y-hh))/(4*hh*hh);
+    let lines=[]; const n=v=>fmt(v,3);
+    if (op==="grad"){ const a=dfx(f,x,y), b=dfy(f,x,y); lines=["∇φ = ( ∂/∂x , ∂/∂y ) φ","= ( ∂φ/∂x , ∂φ/∂y )",`= ( ${n(a)} , ${n(b)} ) = grad φ`]; }
+    else if (op==="div"){ const a=dfx(Ax,x,y), b=dfy(Ay,x,y); lines=["∇·A = ( ∂/∂x , ∂/∂y ) · ( Aₓ , A_y )","= ∂Aₓ/∂x + ∂A_y/∂y",`= ${n(a)} + ${n(b)} = ${n(a+b)} = div A`]; }
+    else if (op==="rot"){ const a=dfx(Ay,x,y), b=dfy(Ax,x,y); lines=["(∇×A)_z = ∂A_y/∂x − ∂Aₓ/∂y","(визначник: рядки i j k / ∂ₓ ∂_y ∂_z / Aₓ A_y A_z)",`= ${n(a)} − ${n(b)} = ${n(a-b)} = rot_z A`]; }
+    else if (op==="lap"){ lines=["∇·(∇φ) = ∂/∂x(∂φ/∂x) + ∂/∂y(∂φ/∂y)","= ∂²φ/∂x² + ∂²φ/∂y²",`= ${n(pxx)} + ${n(pyy)} = ${n(pxx+pyy)} = ∇²φ`]; }
+    else { lines=["(∇×∇φ)_z = ∂/∂x(∂φ/∂y) − ∂/∂y(∂φ/∂x)","= ∂²φ/∂x∂y − ∂²φ/∂y∂x",`= ${n(pxy)} − ${n(pxy)} = 0   (мішані похідні рівні)`]; }
+    const w=Math.min(CW-24,420), x0=12, y0=96; ctx.save(); ctx.fillStyle="rgba(28,28,28,.92)"; ctx.fillRect(x0,y0,w,96); ctx.strokeStyle="#444"; ctx.strokeRect(x0+.5,y0+.5,w,96);
+    ctx.textAlign="left"; ctx.textBaseline="middle"; ctx.font="15px 'STIX Two Math','Cambria Math',Georgia,serif"; lines.forEach((t,i)=>{ ctx.fillStyle=i===lines.length-1?"#ffd166":"#e8e6df"; ctx.fillText(t,x0+12,y0+20+i*27); }); ctx.restore();
+    return usesPhi?`φ: ${PHI[S.ph].name};  точка (${fmt(x)}, ${fmt(y)})`:`A: ${VEC[S.vf].name};  точка (${fmt(x)}, ${fmt(y)})`; }},
+];
+
+/* ---------- UI ---------- */
+const dots=$("dots"); steps.forEach((_,i)=>{ const d=document.createElement("span"); d.onclick=()=>go(i); dots.appendChild(d); });
+function go(i){
+  S.step=Math.max(0,Math.min(steps.length-1,i)); const st=steps[S.step]; st.init();
+  $("ctitle").textContent=st.title; $("ctext").innerHTML=st.html; $("fbody").innerHTML=st.f; $("fnote").textContent=st.n;
+  const c=$("controls"); c.innerHTML="";
+  st.ctl.forEach(s=>{
+    if (s.btn){ const b=document.createElement("button"); b.textContent=s.btn; b.onclick=()=>s.fn(); c.appendChild(b); return; }
+    if (s.sel){ const sel=document.createElement("select"); s.sel.forEach(([k,n])=>{ const o=document.createElement("option"); o.value=k; o.textContent=n; sel.appendChild(o); }); sel.value=s.get(); sel.onchange=()=>{ s.set(sel.value); }; c.appendChild(sel); return; }
+    const l=document.createElement("label"), v=document.createElement("span"), inp=document.createElement("input");
+    inp.type="range"; inp.min=s.min; inp.max=s.max; inp.step=s.step; inp.value=s.get(); const upd=()=>{ v.textContent=s.fmt(s.get()); }; inp.oninput=()=>{ s.set(+inp.value); upd(); }; l.append(s.label+" ",inp,v); upd(); c.appendChild(l); });
+  [...dots.children].forEach((d,k)=>d.classList.toggle("on",k===S.step)); $("count").textContent=(S.step+1)+" / "+steps.length; history.replaceState(null,"","#"+(S.step+1));
+  $("hint").textContent=S.step===0?"тягни точку по рельєфу · тягни фон — обертати":"тягни точку/коробку по полю";
+}
+$("prev").onclick=()=>go(S.step-1); $("next").onclick=()=>go(S.step+1);
+addEventListener("keydown",e=>{ if (e.key==="ArrowRight") go(S.step+1); if (e.key==="ArrowLeft") go(S.step-1); });
+if (innerWidth<720) $("formulas").open=false;
+$("ctitle").onclick=()=>$("card").classList.toggle("collapsed"); if (innerHeight<520) $("card").classList.add("collapsed");
+
+/* ---------- pointer ---------- */
+let lx=0,ly=0;
+const pt=e=>{ const r=stage.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; };
+function movePoint(px,py){
+  if (S.step===0){ let x=S.x,y=S.y; for (let k=0;k<5;k++){ const q=unP3(px,py,clampZ(PHI[S.ph].f(x,y))); x=q.x; y=q.y; } S.x=Math.max(-RX+.1,Math.min(RX-.1,x)); S.y=Math.max(-RY+.1,Math.min(RY-.1,y)); S.ball=false; S.trail=[]; return; }
+  const w=toW(px,py); S.x=Math.max(-XR+.3,Math.min(XR-.3,w.x)); S.y=Math.max(-YR+.3,Math.min(YR-.3,w.y));
+}
+const hitsMarker=(px,py)=>{ if (S.step===0){ const m=P3(S.x,S.y,clampZ(PHI[S.ph].f(S.x,S.y))); return Math.hypot(px-m.x,py-m.y)<24; } const p=toS(S.x,S.y); return Math.hypot(px-p.x,py-p.y)<(S.step>=2&&S.step<=5?Math.max(30,S.s*K*1.2):28); };
+stage.addEventListener("pointerdown",e=>{ const [px,py]=pt(e); stage.setPointerCapture(e.pointerId);
+  if (hitsMarker(px,py)||S.step!==0&&!e.target.closest("#card")){ S.drag="pt"; movePoint(px,py); } else { S.drag="cam"; lx=e.clientX; ly=e.clientY; } });
+stage.addEventListener("pointermove",e=>{ if (!S.drag) return; const [px,py]=pt(e);
+  if (S.drag==="pt") movePoint(px,py); else { S.yaw+=(e.clientX-lx)*.008; S.pitch=Math.max(.25,Math.min(1.5,S.pitch+(e.clientY-ly)*.006)); lx=e.clientX; ly=e.clientY; } });
+stage.addEventListener("pointerup",()=>{ S.drag=null; });
+
+/* ---------- loop ---------- */
+let last=performance.now();
+function loop(t){ const dt=Math.min(.05,(t-last)/1000); last=t; layout(); const st=steps[S.step]; if (st.tick) st.tick(dt);
+  ctx.clearRect(0,0,CW,CH); $("live").textContent=st.draw()||""; requestAnimationFrame(loop); }
+resize(); go((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

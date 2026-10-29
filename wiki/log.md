@@ -92,3 +92,7 @@ Quick view: `grep "^## \[" wiki/log.md | tail -10`
   - Molecular 01: R = 8,31451, (14.17) pV = νRT. 07–09: polytropic C = ±∞ (T), n → ∞ (V). 12–13: ε for reverse Carnot moved to addendum. 14: (16.81)–(16.83) are strict > and = (book has no ≥), Example 16.5 as printed, I/Z for enthalpy and Gibbs; glossary entry fixed. 17,19: ISA lapse rate printed 5,6 К/км vs 6,5 (digits swapped), aerospace facts from с. 334. 22: (15.3) is d = d₀√(1 + C/T). 23–25: (15.29)–(15.30) as printed. 27: reduced temperature θ (17.17)–(17.18). 28: (18.1) r_mnp; Fe in both lattice lists. 30: (19.2)–(19.4) as printed.
 - Our own shorthand, derivations and summaries moved out of book blocks into `## Addendum (not in the book)` at the page bottom; summary tables labelled "our summary". Convention notes (notation, signs, units) added to the addenda.
 - New concept page [Позначення, знаки й одиниці](concepts/notation.md), also in the book appendix (build.py CONCEPTS).
+
+## [2026-10-29] backlog | demo of partial derivatives
+- Added to the backlog in CLAUDE.md: an interactive demo of partial derivatives, as a prerequisite for every demo that uses ∂ (rule from the user: no physics with ∂ before a demo of ∂).
+- New demo `demos/electrostatics/grad-div-rot.html` (grad, div, rot, Stokes, rot grad = 0, ∇²φ, nabla; topics 07–09 of electrostatics). Added to `demos/index.html`.
